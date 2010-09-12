@@ -1,0 +1,17 @@
+<?xml version="1.0" ?>
+
+<container xmlns="http://www.symfony-project.org/schema/dic/services"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.symfony-project.org/schema/dic/services http://www.symfony-project.org/schema/dic/services/services-1.0.xsd">
+
+  <parameters>
+    <parameter key="mondongo.class">Mondongo</parameter>
+    <parameter key="mondongo.default_connection">default</parameter>
+  </parameters>
+
+  <services>
+    <service id="mondongo" class="%mondongo.class%">
+    </service>
+  </services>
+
+</container>
