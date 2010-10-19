@@ -1,9 +1,5 @@
 <?php
 
-namespace Bundle\MondongoBundle;
-
-use Symfony\Framework\Bundle\Bundle;
-
 /*
  * Copyright 2010 Pablo Díez Pascual <pablodip@gmail.com>
  *
@@ -22,6 +18,10 @@ use Symfony\Framework\Bundle\Bundle;
  * You should have received a copy of the GNU Lesser General Public License
  * along with MondongoBundle. If not, see <http://www.gnu.org/licenses/>.
  */
+
+namespace Bundle\MondongoBundle;
+
+use Symfony\Component\HttpKernel\Bundle\Bundle;
 
 /**
  * MondongoBundle.

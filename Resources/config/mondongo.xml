@@ -5,8 +5,7 @@
     xsi:schemaLocation="http://www.symfony-project.org/schema/dic/services http://www.symfony-project.org/schema/dic/services/services-1.0.xsd">
 
   <parameters>
-    <parameter key="mondongo.class">Mondongo</parameter>
-    <parameter key="mondongo.default_connection">default</parameter>
+    <parameter key="mondongo.class">Mondongo\Mondongo</parameter>
   </parameters>
 
   <services>
