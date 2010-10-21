@@ -62,17 +62,31 @@ class GenerateCommand extends Command
             if (is_dir($dir = $bundle->getPath().'/Resources/config/mondongo')) {
                 $finder = new Finder();
                 foreach ($finder->files()->name('*.yml')->followLinks()->in($dir) as $file) {
-                    foreach (Yaml::load($file) as $className => $configClass) {
-                        $configClass['namespaces'] = array(
-                            'document'   => $namespace.'\Document',
-                            'repository' => $namespace.'\Repository',
-                        );
-                        $configClass['document_output']   = $bundle->getPath().'/Document';
-                        $configClass['repository_output'] = $bundle->getPath().'/Repository';
-                        $configClasses[$className] = $configClass;
+                    foreach ((array) Yaml::load($file) as $class => $configClass) {
+                        // main
+                        if (isset($configClass['main']) && $configClass['main']) {
+                            if (isset($configClasses[$class]['main']) && $configClasses[$class]['main']) {
+                                throw new \RuntimeException(sprintf('The class "%s" has more than one main.', $class));
+                            }
+
+                            $configClass['document_output']   = $bundle->getPath().'/Document';
+                            $configClass['repository_output'] = $bundle->getPath().'/Repository';
+                        }
+
+                        // merge
+                        if (!isset($configClasses[$class])) {
+                            $configClasses[$class] = array();
+                        }
+                        $configClasses[$class] = array_merge_recursive($configClasses[$class], $configClass);
                     }
                 }
             }
+        }
+        foreach ($configClasses as $class => &$configClass) {
+            if (!isset($configClass['main']) || !$configClass['main']) {
+                throw new \RuntimeException(sprintf('The class "%s" does not have main.', $class));
+            }
+            unset($configClass['main']);
         }
 
         $output->writeln('generating classes');
@@ -80,8 +94,7 @@ class GenerateCommand extends Command
         $mondator = new Mondator();
         $mondator->setConfigClasses($configClasses);
         $mondator->setExtensions(array(
-            new \Mondongo\Extension\CoreStart(),
-            new \Mondongo\Extension\CoreEnd(),
+            new \Mondongo\Extension\Core(),
         ));
         $mondator->process();
     }
