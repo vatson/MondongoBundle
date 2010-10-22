@@ -1,13 +1,5 @@
 <?php
 
-namespace Bundle\MondongoBundle\DependencyInjection;
-
-use Symfony\Component\DependencyInjection\Extension\Extension;
-use Symfony\Component\DependencyInjection\Loader\XmlFileLoader;
-use Symfony\Component\DependencyInjection\ContainerBuilder;
-use Symfony\Component\DependencyInjection\Definition;
-use Symfony\Component\DependencyInjection\Reference;
-
 /*
  * Copyright 2010 Pablo Díez Pascual <pablodip@gmail.com>
  *
@@ -26,6 +18,14 @@ use Symfony\Component\DependencyInjection\Reference;
  * You should have received a copy of the GNU Lesser General Public License
  * along with MondongoBundle. If not, see <http://www.gnu.org/licenses/>.
  */
+
+namespace Bundle\MondongoBundle\DependencyInjection;
+
+use Symfony\Component\DependencyInjection\Extension\Extension;
+use Symfony\Component\DependencyInjection\Loader\XmlFileLoader;
+use Symfony\Component\DependencyInjection\ContainerBuilder;
+use Symfony\Component\DependencyInjection\Definition;
+use Symfony\Component\DependencyInjection\Reference;
 
 /**
  * MondongoExtension.
