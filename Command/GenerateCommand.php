@@ -56,21 +56,34 @@ class GenerateCommand extends Command
 
         $configClasses = array();
         foreach ($this->container->getKernelService()->getBundles() as $bundle) {
-            $bundleClass = get_class($bundle);
-            $namespace   = substr($bundleClass, 0, strrpos($bundleClass, '\\'));
+            $bundleClass     = get_class($bundle);
+            $bundleNamespace = substr($bundleClass, 0, strrpos($bundleClass, '\\'));
 
             if (is_dir($dir = $bundle->getPath().'/Resources/config/mondongo')) {
                 $finder = new Finder();
                 foreach ($finder->files()->name('*.yml')->followLinks()->in($dir) as $file) {
                     foreach ((array) Yaml::load($file) as $class => $configClass) {
-                        // main
-                        if (isset($configClass['main']) && $configClass['main']) {
-                            if (isset($configClasses[$class]['main']) && $configClasses[$class]['main']) {
-                                throw new \RuntimeException(sprintf('The class "%s" has more than one main.', $class));
+                        // class
+                        if (0 === strpos($class, $bundleNamespace)) {
+                            if (
+                                0 !== strpos($class, $bundleNamespace.'\\Document')
+                                ||
+                                strlen($bundleNamespace.'\\Document') !== strrpos($class, '\\')
+                            ) {
+                                throw new \RuntimeException(sprintf('The class "%s" is not in the Document namespace of the bundle.', $class));
                             }
+                        }
 
-                            $configClass['document_output']   = $bundle->getPath().'/Document';
-                            $configClass['repository_output'] = $bundle->getPath().'/Repository';
+                        // outputs
+                        if (0 === strpos($class, $bundleNamespace)) {
+                            if (!isset($configClass['document_output'])) {
+                                $configClass['document_output'] = $bundle->getPath().'/Document';
+                            }
+                            if (!isset($configClass['repository_output'])) {
+                                $configClass['repository_output'] = $bundle->getPath().'/Repository';
+                            }
+                        } else {
+                            unset($configClass['document_output'], $configClass['repository_output']);
                         }
 
                         // merge
@@ -81,12 +94,6 @@ class GenerateCommand extends Command
                     }
                 }
             }
-        }
-        foreach ($configClasses as $class => &$configClass) {
-            if (!isset($configClass['main']) || !$configClass['main']) {
-                throw new \RuntimeException(sprintf('The class "%s" does not have main.', $class));
-            }
-            unset($configClass['main']);
         }
 
         $output->writeln('generating classes');
