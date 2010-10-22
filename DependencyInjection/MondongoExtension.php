@@ -85,7 +85,10 @@ class MondongoExtension extends Extension
             }
         }
 
-        return;
+        // log
+        if (isset($config['log']) && $config['log']) {
+            $container->getDefinition('mondongo')->addMethodCall('setLoggerCallable', array(array(new Reference('mondongo.logger'), 'logQuery')));
+        }
     }
 
     static public function mondongoConfigurator($mondongo)

@@ -5,11 +5,30 @@
     xsi:schemaLocation="http://www.symfony-project.org/schema/dic/services http://www.symfony-project.org/schema/dic/services/services-1.0.xsd">
 
   <parameters>
+    <!-- mondongo -->
     <parameter key="mondongo.class">Mondongo\Mondongo</parameter>
+
+    <!-- logger -->
+    <parameter key="mondongo.logger_class">Bundle\MondongoBundle\Logger\MondongoLogger</parameter>
+
+    <!-- data collector -->
+    <parameter key="mondongo.data_collector_class">Bundle\MondongoBundle\DataCollector\MondongoDataCollector</parameter>
   </parameters>
 
   <services>
+    <!-- mondongo -->
     <service id="mondongo" class="%mondongo.class%">
+    </service>
+
+    <!-- logger -->
+    <service id="mondongo.logger" class="%mondongo.logger_class%">
+        <argument type="service" id="logger" on-invalid="null" />
+    </service>
+
+    <!-- data collector -->
+    <service id="mondongo.data_collector" class="%mondongo.data_collector_class%">
+        <tag name="data_collector" />
+        <argument type="service" id="mondongo.logger" />
     </service>
   </services>
 
