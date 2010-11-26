@@ -55,7 +55,7 @@ class GenerateCommand extends Command
         $output->writeln('processing config classes');
 
         $configClasses = array();
-        foreach ($this->container->getKernelService()->getBundles() as $bundle) {
+        foreach ($this->container->get('kernel')->getBundles() as $bundle) {
             $bundleClass     = get_class($bundle);
             $bundleNamespace = substr($bundleClass, 0, strrpos($bundleClass, '\\'));
 
