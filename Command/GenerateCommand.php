@@ -76,14 +76,9 @@ class GenerateCommand extends Command
 
                         // outputs
                         if (0 === strpos($class, $bundleNamespace)) {
-                            if (!isset($configClass['document_output'])) {
-                                $configClass['document_output'] = $bundle->getPath().'/Document';
-                            }
-                            if (!isset($configClass['repository_output'])) {
-                                $configClass['repository_output'] = $bundle->getPath().'/Repository';
-                            }
+                            $configClass['output'] = $bundle->getPath().'/Document';
                         } else {
-                            unset($configClass['document_output'], $configClass['repository_output']);
+                            unset($configClass['output']);
                         }
 
                         // merge
