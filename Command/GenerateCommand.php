@@ -58,6 +58,7 @@ class GenerateCommand extends Command
         foreach ($this->container->get('kernel')->getBundles() as $bundle) {
             $bundleClass     = get_class($bundle);
             $bundleNamespace = substr($bundleClass, 0, strrpos($bundleClass, '\\'));
+            $bundleName      = substr($bundleClass, strrpos($bundleClass, '\\') + 1);
 
             if (is_dir($dir = $bundle->getPath().'/Resources/config/mondongo')) {
                 $finder = new Finder();
@@ -74,9 +75,12 @@ class GenerateCommand extends Command
                             }
                         }
 
-                        // outputs
+                        // outputs && bundle
                         if (0 === strpos($class, $bundleNamespace)) {
                             $configClass['output'] = $bundle->getPath().'/Document';
+
+                            $configClass['bundle_name'] = $bundleName;
+                            $configClass['bundle_dir']  = $bundle->getPath();
                         } else {
                             unset($configClass['output']);
                         }
@@ -97,6 +101,9 @@ class GenerateCommand extends Command
         $mondator->setConfigClasses($configClasses);
         $mondator->setExtensions(array(
             new \Mondongo\Extension\Core(),
+            new \Bundle\MondongoBundle\Extension\GenBundleDocument(array(
+                'gen_dir' => $this->container->getParameter('kernel.root_dir').'/../src/Gen',
+            )),
         ));
         $mondator->process();
     }
