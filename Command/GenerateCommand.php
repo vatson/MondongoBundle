@@ -82,7 +82,7 @@ class GenerateCommand extends Command
                             $configClass['bundle_name'] = $bundleName;
                             $configClass['bundle_dir']  = $bundle->getPath();
                         } else {
-                            unset($configClass['output']);
+                            unset($configClass['output'], $configClass['bundle_name'], $configClass['bundle_dir']);
                         }
 
                         // merge
