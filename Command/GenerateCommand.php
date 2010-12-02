@@ -54,33 +54,35 @@ class GenerateCommand extends Command
     {
         $output->writeln('processing config classes');
 
+        $genDir = $this->container->getParameter('kernel.root_dir').'/../src/Gen';
+
         $configClasses = array();
         foreach ($this->container->get('kernel')->getBundles() as $bundle) {
-            $bundleClass     = get_class($bundle);
-            $bundleNamespace = substr($bundleClass, 0, strrpos($bundleClass, '\\'));
-            $bundleName      = substr($bundleClass, strrpos($bundleClass, '\\') + 1);
+            $bundleClass        = get_class($bundle);
+            $bundleName         = substr($bundleClass, strrpos($bundleClass, '\\') + 1);
+            $bundleGenNamespace = 'Gen\\'.$bundleName;
 
             if (is_dir($dir = $bundle->getPath().'/Resources/config/mondongo')) {
                 $finder = new Finder();
                 foreach ($finder->files()->name('*.yml')->followLinks()->in($dir) as $file) {
                     foreach ((array) Yaml::load($file) as $class => $configClass) {
                         // class
-                        if (0 === strpos($class, $bundleNamespace)) {
+                        if (0 === strpos($class, $bundleGenNamespace)) {
                             if (
-                                0 !== strpos($class, $bundleNamespace.'\\Document')
+                                0 !== strpos($class, $bundleGenNamespace.'\\Document')
                                 ||
-                                strlen($bundleNamespace.'\\Document') !== strrpos($class, '\\')
+                                strlen($bundleGenNamespace.'\\Document') !== strrpos($class, '\\')
                             ) {
                                 throw new \RuntimeException(sprintf('The class "%s" is not in the Document namespace of the bundle.', $class));
                             }
                         }
 
                         // outputs && bundle
-                        if (0 === strpos($class, $bundleNamespace)) {
-                            $configClass['output'] = $bundle->getPath().'/Document';
+                        if (0 === strpos($class, $bundleGenNamespace)) {
+                            $configClass['output'] = $genDir.'/'.$bundleName.'/Document';
 
-                            $configClass['bundle_name'] = $bundleName;
-                            $configClass['bundle_dir']  = $bundle->getPath();
+                            $configClass['bundle_class'] = $bundleClass;
+                            $configClass['bundle_dir']   = $bundle->getPath();
                         } else {
                             unset($configClass['output'], $configClass['bundle_name'], $configClass['bundle_dir']);
                         }
@@ -101,9 +103,7 @@ class GenerateCommand extends Command
         $mondator->setConfigClasses($configClasses);
         $mondator->setExtensions(array(
             new \Mondongo\Extension\Core(),
-            new \Bundle\MondongoBundle\Extension\GenBundleDocument(array(
-                'gen_dir' => $this->container->getParameter('kernel.root_dir').'/../src/Gen',
-            )),
+            new \Bundle\MondongoBundle\Extension\GenBundleDocument(),
         ));
         $mondator->process();
     }
