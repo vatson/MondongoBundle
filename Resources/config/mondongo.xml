@@ -27,7 +27,7 @@
 
     <!-- data collector -->
     <service id="mondongo.data_collector" class="%mondongo.data_collector_class%">
-        <tag name="data_collector" />
+        <tag name="data_collector" template="MondongoBundle:Collector:mondongo" />
         <argument type="service" id="mondongo.logger" />
     </service>
   </services>
