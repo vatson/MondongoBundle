@@ -20,6 +20,11 @@
     <service id="mondongo" class="%mondongo.class%">
     </service>
 
+    <!-- extensions -->
+    <service id="mondongo.extension.from_to_array" class="Mondongo\Extension\DocumentFromToArray">
+        <tag name="mondongo.extension" />
+    </service>
+
     <!-- logger -->
     <service id="mondongo.logger" class="%mondongo.logger_class%">
         <argument type="service" id="logger" on-invalid="null" />

@@ -99,12 +99,17 @@ class GenerateCommand extends Command
 
         $output->writeln('generating classes');
 
-        $mondator = new Mondator();
-        $mondator->setConfigClasses($configClasses);
-        $mondator->setExtensions(array(
+        $extensions = array(
             new \Mondongo\Extension\Core(),
             new \Bundle\MondongoBundle\Extension\GenBundleDocument(),
-        ));
+        );
+        foreach ($this->container->findTaggedServiceIds('mondongo.extension') as $id => $attributes) {
+            $extensions[] = $this->container->get($id);
+        }
+
+        $mondator = new Mondator();
+        $mondator->setConfigClasses($configClasses);
+        $mondator->setExtensions($extensions);
         $mondator->process();
     }
 }
