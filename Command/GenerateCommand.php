@@ -102,6 +102,7 @@ class GenerateCommand extends Command
         $extensions = array(
             new \Mondongo\Extension\Core(),
             new \Bundle\MondongoBundle\Extension\GenBundleDocument(),
+            new \Bundle\MondongoBundle\Extension\DocumentValidation(),
         );
         foreach ($this->container->findTaggedServiceIds('mondongo.extension') as $id => $attributes) {
             $extensions[] = $this->container->get($id);
