@@ -23,7 +23,7 @@ namespace Bundle\MondongoBundle\Security;
 
 use Symfony\Component\Security\User\UserProviderInterface;
 use Symfony\Component\Security\Exception\UsernameNotFoundException;
-use Mondongo\Repository;
+use Mondongo\Mondongo;
 
 /**
  * DocumentUserProvider.
@@ -33,18 +33,21 @@ use Mondongo\Repository;
  */
 class DocumentUserProvider implements UserProviderInterface
 {
+    protected $mondongo;
     protected $repository;
     protected $field;
 
     /**
      * Constructor.
      *
-     * @param \Mondongo\Repository $repository A Mondongo repository.
-     * @param string               $field      The field.
+     * @param \Mondongo\Mondongo $mondongo A Mondongo.
+     * @param string             $class    The class
+     * @param string             $field    The field.
      */
-    public function __construct(Repository $repository, $class, $field = null)
+    public function __construct(Mondongo $mondongo, $class, $field = null)
     {
-        $this->repository = $repository;
+        $this->mondongo   = $mondongo;
+        $this->repository = $mondongo->getRepository($class);
         $this->field      = $field;
     }
 
@@ -57,7 +60,7 @@ class DocumentUserProvider implements UserProviderInterface
             $user = $this->repository->findOne(array($this->field => $username));
         } else {
             if (!$this->repository instanceof UserProviderInterface) {
-                throw new \InvalidArgumentException(sprintf('The Moctrine repository "%s" must implement UserProviderInterface.', get_class($this->repository)));
+                throw new \InvalidArgumentException(sprintf('The Mondongo repository "%s" must implement UserProviderInterface.', get_class($this->repository)));
             }
 
             $user = $this->repository->loadUserByUsername($username);
