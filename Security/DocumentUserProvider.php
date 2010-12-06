@@ -19,7 +19,7 @@
  * along with MondongoBundle. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace Bundle\MondongoBundle\Logger;
+namespace Bundle\MondongoBundle\Security;
 
 use Symfony\Component\Security\User\UserProviderInterface;
 use Symfony\Component\Security\Exception\UsernameNotFoundException;
