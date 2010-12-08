@@ -25,6 +25,7 @@ use Mondongo\Mondator\Extension;
 use Mondongo\Mondator\Definition\Definition;
 use Mondongo\Mondator\Definition\Method;
 use Mondongo\Mondator\Output\Output;
+use Mondongo\Inflector;
 
 /**
  * DocumentForm extension.
@@ -42,6 +43,10 @@ class DocumentForm extends Extension
         $this->processInitDefinitionsAndOutputs();
 
         $this->processFormConfigureMethod();
+        $this->processFormAddReferencesMethods();
+        $this->processFormAddReferenceMethod();
+        $this->processFormAddEmbeddedsMethods();
+        $this->processFormAddEmbeddedMethod();
     }
 
     /*
@@ -93,7 +98,7 @@ EOF
 
         // form base
         $this->definitions['form_base'] = $definition = new Definition($classes['form_base']);
-        $definition->setParentClass('\Symfony\Component\Form\Form');
+        $definition->setParentClass('\Bundle\MondongoBundle\Form\MondongoForm');
         $definition->setIsAbstract(true);
         $definition->setDocComment(<<<EOF
 /**
@@ -152,5 +157,165 @@ EOF
             default:
                 return 'Symfony\Component\Form\TextField';
         }
+    }
+
+    /*
+     * Form add references methods.
+     */
+    protected function processFormAddReferencesMethods()
+    {
+        foreach ($this->configClass['references'] as $name => $reference) {
+            $referenceSetter = 'set'.Inflector::camelize($name);
+            $referenceGetter = 'get'.Inflector::camelize($name);
+            $formClass = $this->getFormClassFromDocumentClass($reference['class']);
+
+            // one
+            if ('one' == $reference['type']) {
+                $code = <<<EOF
+        if (null === \$reference = \$this->getData()->$referenceGetter()) {
+            \$reference = new \\{$reference['class']}();
+            \$this->getData()->$referenceSetter(\$reference);
+        }
+        \$form = new \\$formClass('$name', \$reference, \$this->validator);
+        \$this->add(\$form);
+EOF;
+            // many
+            } else {
+                $code = <<<EOF
+        \$fieldGroup = new \Bundle\MondongoBundle\Form\MondongoFieldGroup('$name');
+        foreach (\$this->getData()->$referenceGetter() as \$key => \$reference) {
+            \$form = new \\$formClass(\$key, \$reference, \$this->validator);
+            \$fieldGroup->add(\$form);
+        }
+        \$this->add(\$fieldGroup);
+EOF;
+            }
+
+            $method = new Method('public', 'add'.Inflector::camelize($name).'Reference', '', $code);
+            $method->setDocComment(<<<EOF
+    /**
+     * Add a field of a reference document.
+     *
+     * @param string \$name The reference name.
+     */
+EOF
+            );
+            $this->definitions['form_base']->addMethod($method);
+        }
+    }
+
+    /*
+     * Form "addReference" method.
+     */
+    protected function processFormAddReferenceMethod()
+    {
+        $code = '';
+        foreach ($this->configClass['references'] as $name => $reference) {
+            $addReferenceMethod = 'add'.Inflector::camelize($name).'Reference';
+            $code .= <<<EOF
+        if ('$name' == \$name) {
+            \$this->$addReferenceMethod();
+            return;
+        }
+
+EOF;
+        }
+        $code .= <<<EOF
+
+        throw new \InvalidArgumentException(sprintf('The reference "%s" does not exists.', \$name));
+EOF;
+
+        $method = new Method('public', 'addReference', '$name', $code);
+        $method->setDocComment(<<<EOF
+    /**
+     * Add a reference by name.
+     *
+     * @param string \$name The reference name.
+     */
+EOF
+        );
+        $this->definitions['form_base']->addMethod($method);
+    }
+
+    /*
+     * Form add embeddeds methods
+     */
+    protected function processFormAddEmbeddedsMethods()
+    {
+        foreach ($this->configClass['embeddeds'] as $name => $embedded) {
+            $embeddedGetter = 'get'.Inflector::camelize($name);
+            $formClass = $this->getFormClassFromDocumentClass($embedded['class']);
+
+            // one
+            if ('one' == $embedded['type']) {
+                $code = <<<EOF
+        \$form = new \\$formClass('$name', \$this->getData()->$embeddedGetter(), \$this->validator);
+        \$this->add(\$form);
+EOF;
+            // many
+            } else {
+                $code = <<<EOF
+        \$fieldGroup = new \Bundle\MondongoBundle\Form\MondongoFieldGroup('$name');
+        foreach (\$this->getData()->$embeddedGetter() as \$key => \$embedded) {
+            \$form = new \\$formClass(\$key, \$embedded, \$this->validator);
+            \$fieldGroup->add(\$form);
+        }
+        \$this->add(\$fieldGroup);
+EOF;
+            }
+
+            $method = new Method('public', 'add'.Inflector::camelize($name).'Embedded', '', $code);
+            $method->setDocComment(<<<EOF
+    /**
+     * Add a field of an embedded document.
+     *
+     * @param string \$name The embedded name.
+     */
+EOF
+            );
+            $this->definitions['form_base']->addMethod($method);
+        }
+    }
+
+    /*
+     * Form "addEmbedded" method.
+     */
+    protected function processFormAddEmbeddedMethod()
+    {
+        $code = '';
+        foreach ($this->configClass['embeddeds'] as $name => $embedded) {
+            $addEmbeddedMethod = 'add'.Inflector::camelize($name).'Embedded';
+            $code .= <<<EOF
+        if ('$name' == \$name) {
+            \$this->$addEmbeddedMethod();
+            return;
+        }
+
+EOF;
+        }
+        $code .= <<<EOF
+
+        throw new \InvalidArgumentException(sprintf('The embedded "%s" does not exists.', \$name));
+EOF;
+
+        $method = new Method('public', 'addEmbedded', '$name', $code);
+        $method->setDocComment(<<<EOF
+    /**
+     * Add a embedded by name.
+     *
+     * @param string \$name The embedded name.
+     */
+EOF
+        );
+        $this->definitions['form_base']->addMethod($method);
+    }
+
+    protected function getFormClassFromDocumentClass($documentClass)
+    {
+        $className = substr($documentClass, strrpos($documentClass, '\\') + 1);
+        $genBundleNamespace = substr($documentClass, 0, strrpos($documentClass, '\\'));
+        $genBundleNamespace = substr($genBundleNamespace, 0, strrpos($genBundleNamespace, '\\'));
+
+        return $genBundleNamespace.'\Form\Document\\'.$className.'Form';
     }
 }
