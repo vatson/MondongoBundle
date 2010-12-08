@@ -72,16 +72,18 @@ EOF
         );
 
         // repository
-        $this->definitions['repository']->setParentClass('\\'.$classes['repository_bundle']);
+        if (!$this->configClass['is_embedded']) {
+            $this->definitions['repository']->setParentClass('\\'.$classes['repository_bundle']);
 
-        $this->definitions['repository_bundle'] = new Definition($classes['repository_bundle']);
-        $this->definitions['repository_bundle']->setParentClass('\\'.$this->definitions['repository_base']->getClass());
-        $this->definitions['repository_bundle']->setDocComment(<<<EOF
+            $this->definitions['repository_bundle'] = new Definition($classes['repository_bundle']);
+            $this->definitions['repository_bundle']->setParentClass('\\'.$this->definitions['repository_base']->getClass());
+            $this->definitions['repository_bundle']->setDocComment(<<<EOF
 /**
  * {$this->class} document repository bundle
  */
 EOF
-        );
+            );
+        }
 
         /*
          * Outputs.
@@ -91,6 +93,8 @@ EOF
         $this->outputs['document_bundle'] = new Output($this->configClass['bundle_dir'].'/Document');
 
         // repository
-        $this->outputs['repository_bundle'] = new Output($this->configClass['bundle_dir'].'/Document');
+        if (!$this->configClass['is_embedded']) {
+            $this->outputs['repository_bundle'] = new Output($this->configClass['bundle_dir'].'/Document');
+        }
     }
 }
