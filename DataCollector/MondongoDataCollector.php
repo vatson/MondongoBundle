@@ -88,7 +88,7 @@ class MondongoDataCollector extends DataCollector
     {
         $formattedQueries = array();
         foreach ($this->getQueries() as $query) {
-            $formattedQueries[] = Yaml::dump($query);
+            $formattedQueries[] = Yaml::dump($query, 6);
         }
 
         return $formattedQueries;
