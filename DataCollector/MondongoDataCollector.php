@@ -80,6 +80,21 @@ class MondongoDataCollector extends DataCollector
     }
 
     /**
+     * Returns the time of the all queries (in milliseconds).
+     *
+     * @return integer The time of the all queries in milliseconds.
+     */
+    public function getTime()
+    {
+        $time = 0;
+        foreach ($this->getQueries() as $query) {
+            $time += $query['time'];
+        }
+
+        return $time;
+    }
+
+    /**
      * Returns the queries formatted.
      *
      * @return array The queries formatted.
@@ -88,7 +103,31 @@ class MondongoDataCollector extends DataCollector
     {
         $formattedQueries = array();
         foreach ($this->getQueries() as $query) {
-            $formattedQueries[] = Yaml::dump($query, 6);
+            if (!isset($query['type'])) {
+                print_r($query);
+                exit();
+            }
+            $formattedQuery = array(
+                'connection'  => $query['connection'],
+                'database'    => $query['database'],
+                'collection'  => $query['collection'],
+                'type'        => $query['type'],
+                'time'        => $query['time'],
+            );
+
+            foreach (array(
+                'connection',
+                'database',
+                'collection',
+                'type',
+                'time',
+            ) as $key) {
+                unset($query[$key]);
+            }
+
+            $formattedQuery['query'] = Yaml::dump($query, 'batchInsert' == $formattedQuery['type'] ? 6 : 2);
+
+            $formattedQueries[] = $formattedQuery;
         }
 
         return $formattedQueries;
