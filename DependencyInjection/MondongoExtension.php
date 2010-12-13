@@ -50,11 +50,6 @@ class MondongoExtension extends Extension
             $loader->load('mondongo.xml');
         }
 
-        // mondongo configurator
-        $container->getDefinition('mondongo')->setConfigurator(
-            array('Bundle\MondongoBundle\DependencyInjection\MondongoExtension', 'mondongoConfigurator')
-        );
-
         // override defaults parameters
         foreach (array('class') as $parameter) {
             if (isset($config[$parameter])) {
@@ -89,11 +84,6 @@ class MondongoExtension extends Extension
         if (isset($config['log']) && $config['log']) {
             $container->getDefinition('mondongo')->addArgument(array(new Reference('mondongo.logger'), 'logQuery'));
         }
-    }
-
-    static public function mondongoConfigurator($mondongo)
-    {
-        \Mondongo\Container::setDefault($mondongo);
     }
 
     /**

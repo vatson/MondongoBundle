@@ -33,6 +33,11 @@ class MondongoBundle extends Bundle
 {
     public function boot()
     {
-        $this->container->get('mondongo');
+        \Mondongo\Container::setLoader(array($this, 'loadMondongo'));
+    }
+
+    public function loadMondongo()
+    {
+        return $this->container->get('mondongo');
     }
 }
