@@ -87,7 +87,7 @@ class MondongoExtension extends Extension
 
         // log
         if (isset($config['log']) && $config['log']) {
-            $container->getDefinition('mondongo')->addMethodCall('setLoggerCallable', array(array(new Reference('mondongo.logger'), 'logQuery')));
+            $container->getDefinition('mondongo')->addArgument(array(new Reference('mondongo.logger'), 'logQuery'));
         }
     }
 
