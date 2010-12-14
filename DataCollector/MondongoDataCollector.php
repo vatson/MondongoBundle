@@ -108,17 +108,15 @@ class MondongoDataCollector extends DataCollector
                 exit();
             }
             $formattedQuery = array(
-                'connection'  => $query['connection'],
-                'database'    => $query['database'],
-                'collection'  => $query['collection'],
-                'type'        => $query['type'],
-                'time'        => $query['time'],
+                'connection' => $query['connection'],
+                'database'   => $query['database'],
+                'type'       => $query['type'],
+                'time'       => $query['time'],
             );
 
             foreach (array(
                 'connection',
                 'database',
-                'collection',
                 'type',
                 'time',
             ) as $key) {
