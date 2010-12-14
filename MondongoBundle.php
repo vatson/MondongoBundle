@@ -33,6 +33,7 @@ class MondongoBundle extends Bundle
 {
     public function boot()
     {
+        \Mondongo\Container::clear();
         \Mondongo\Container::setLoader(array($this, 'loadMondongo'));
     }
 
