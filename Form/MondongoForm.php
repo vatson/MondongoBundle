@@ -59,14 +59,4 @@ class MondongoForm extends Form
 
         return $field;
     }
-
-    /**
-     * Add an embedded by name.
-     *
-     * @param string $name The embedded name.
-     */
-    public function addEmbedded($name)
-    {
-        $this->{'add'.Inflector::camelize($name).'Embedded'}();
-    }
 }
