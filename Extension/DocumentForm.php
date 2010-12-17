@@ -59,25 +59,15 @@ class DocumentForm extends Extension
          */
 
         $className = substr($this->class, strrpos($this->class, '\\') + 1);
-        $genBundleNamespace = substr($this->class, 0, strrpos($this->class, '\\'));
-        $genBundleNamespace = substr($genBundleNamespace, 0, strrpos($genBundleNamespace, '\\'));
+        $bundleNamespace = substr($this->class, 0, strrpos($this->class, '\\'));
+        $bundleNamespace = substr($bundleNamespace, 0, strrpos($bundleNamespace, '\\'));
 
-        $classes = array(
-            'form'        => '%gen_bundle_namespace%\Form\Document\%class_name%Form',
-            'form_bundle' => '%bundle_namespace%\Form\Document\%class_name%Form',
-            'form_base'   => '%gen_bundle_namespace%\Form\Document\Base\%class_name%Form',
-        );
-        foreach ($classes as &$class) {
-            $class = strtr($class, array(
-                '%gen_bundle_namespace%' => $genBundleNamespace,
-                '%bundle_namespace%'     => substr($this->configClass['bundle_class'], 0, strrpos($this->configClass['bundle_class'], '\\')),
-                '%class_name%'           => $className,
-            ));
-        }
+        $formClass = $bundleNamespace.'\Form\Document\\'.$className.'Form';
+        $formBaseClass = 'Base\\'.str_replace('\\', '', $formClass);
 
         // form
-        $this->definitions['form'] = $definition = new Definition($classes['form']);
-        $definition->setParentClass('\\'.$classes['form_bundle']);
+        $this->definitions['form'] = $definition = new Definition($formClass);
+        $definition->setParentClass('\\'.$formBaseClass);
         $definition->setDocComment(<<<EOF
 /**
  * Form class for the {$this->class} document.
@@ -85,19 +75,8 @@ class DocumentForm extends Extension
 EOF
         );
 
-        // form bundle
-        $this->definitions['form_bundle'] = $definition = new Definition($classes['form_bundle']);
-        $definition->setParentClass('\\'.$classes['form_base']);
-        $definition->setIsAbstract(true);
-        $definition->setDocComment(<<<EOF
-/**
- * Form bundle class for the {$this->class} document.
- */
-EOF
-        );
-
         // form base
-        $this->definitions['form_base'] = $definition = new Definition($classes['form_base']);
+        $this->definitions['form_base'] = $definition = new Definition($formBaseClass);
         $definition->setParentClass('\Bundle\MondongoBundle\Form\MondongoForm');
         $definition->setIsAbstract(true);
         $definition->setDocComment(<<<EOF
@@ -111,11 +90,11 @@ EOF
          * Outputs.
          */
 
-        $this->outputs['form'] = new Output(dirname($this->outputs['document']->getDir()).'/Form/Document');
+        // form
+        $this->outputs['form'] = new Output($this->outputs['document']->getDir().'/../Form/Document');
 
-        $this->outputs['form_bundle'] = new Output(dirname($this->outputs['document_bundle']->getDir()).'/Form/Document');
-
-        $this->outputs['form_base'] = new Output($this->outputs['form']->getDir().'/Base', true);
+        // form_base
+        $this->outputs['form_base'] = new Output($this->outputs['document_base']->getDir(), true);
     }
 
     /**

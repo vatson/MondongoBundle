@@ -19,44 +19,26 @@
  * along with MondongoBundle. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace Bundle\MondongoBundle\Command;
+namespace Bundle\MondongoBundle\Extension;
 
-use Symfony\Bundle\FrameworkBundle\Command\Command;
-use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Finder\Finder;
-use Symfony\Component\Yaml\Yaml;
-use Mondongo\Mondator\Mondator;
+use Mondongo\Mondator\Extension;
 
 /**
- * GenerateCommand.
+ * OnlyBaseClasses extension.
  *
  * @package MondongoBundle
  * @author  Pablo Díez Pascual <pablodip@gmail.com>
  */
-class GenerateCommand extends Command
+class OnlyBaseClasses extends Extension
 {
     /**
-     * @inheritDoc
+     * @inheritdoc
      */
-    protected function configure()
+    protected function doProcess()
     {
-        $this
-            ->setName('mondongo:generate')
-            ->setDescription('Generate documents classes from config classes.')
-        ;
-    }
-
-    /**
-     * @inheritDoc
-     */
-    protected function execute(InputInterface $input, OutputInterface $output)
-    {
-        $output->writeln('generating classes');
-
-        foreach ($this->container->get('kernel')->getBundles() as $bundle) {
-            if ('Bundle\MondongoBundle\MondongoBundle' == get_class($bundle)) {
-                $bundle->generateAllClasses();
+        foreach ($this->definitions as $name => $definition) {
+            if (strlen($name) < 5 || '_base' != substr($name, -5)) {
+                unset($this->definitions[$name], $this->outputs[$name]);
             }
         }
     }
