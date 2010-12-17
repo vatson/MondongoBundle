@@ -58,12 +58,4 @@ class MondongoFieldGroup extends FieldGroup
 
         return $field;
     }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function bind($taintedData)
-    {
-        return parent::bind($taintedData);
-    }
 }
