@@ -33,7 +33,7 @@ use Symfony\Component\Form\FieldInterface;
 class MondongoFieldGroup extends FieldGroup
 {
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public function add(FieldInterface $field)
     {
@@ -60,7 +60,7 @@ class MondongoFieldGroup extends FieldGroup
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public function bind($taintedData)
     {

@@ -35,7 +35,7 @@ use Mondongo\Inflector;
 class DocumentValidation extends Extension
 {
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     protected function doProcess()
     {

@@ -87,7 +87,7 @@ class MondongoExtension extends Extension
     }
 
     /**
-     * @inheritDoc
+     * {@inheritdoc}
      */
     public function getXsdValidationBasePath()
     {
@@ -95,7 +95,7 @@ class MondongoExtension extends Extension
     }
 
     /**
-     * @inheritDoc
+     * {@inheritdoc}
      */
     public function getNamespace()
     {
@@ -103,7 +103,7 @@ class MondongoExtension extends Extension
     }
 
     /**
-     * @inheritDoc
+     * {@inheritdoc}
      */
     public function getAlias()
     {

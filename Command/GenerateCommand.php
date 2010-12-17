@@ -37,7 +37,7 @@ use Mondongo\Mondator\Mondator;
 class GenerateCommand extends Command
 {
     /**
-     * @inheritDoc
+     * {@inheritdoc}
      */
     protected function configure()
     {
@@ -48,7 +48,7 @@ class GenerateCommand extends Command
     }
 
     /**
-     * @inheritDoc
+     * {@inheritdoc}
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {

@@ -34,7 +34,7 @@ use Mondongo\Inflector;
 class MondongoForm extends Form
 {
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public function add(FieldInterface $field)
     {

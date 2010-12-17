@@ -36,7 +36,7 @@ use Mondongo\Inflector;
 class DocumentForm extends Extension
 {
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     protected function doProcess()
     {

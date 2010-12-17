@@ -32,7 +32,7 @@ use Mondongo\Mondator\Extension;
 class KernelCacheBaseClasses extends Extension
 {
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     protected function setup()
     {
@@ -40,7 +40,7 @@ class KernelCacheBaseClasses extends Extension
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     protected function doProcess()
     {

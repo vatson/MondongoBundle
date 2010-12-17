@@ -32,7 +32,7 @@ use Mondongo\Mondator\Extension;
 class OnlyBaseClasses extends Extension
 {
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     protected function doProcess()
     {

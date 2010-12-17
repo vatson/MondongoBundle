@@ -34,7 +34,7 @@ use Symfony\Component\Yaml\Yaml;
 class MondongoBundle extends Bundle
 {
     /**
-     * @inhericdoc
+     * {@inheritdoc}
      */
     public function boot()
     {
@@ -46,7 +46,7 @@ class MondongoBundle extends Bundle
     }
 
     /**
-     * @inhericdoc
+     * {@inheritdoc}
      */
     public function shutdown()
     {
