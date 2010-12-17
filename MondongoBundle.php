@@ -178,12 +178,17 @@ class MondongoBundle extends Bundle
         $mondator->setExtensions($extensions);
         $mondator->process();
 
-        $file = $this->getBaseClassesHashFile();
-        $tmpFile = tempnam(dirname($file), basename($file));
-        if (false === @file_put_contents($tmpFile, $this->getConfigFilesHash()) || !@rename($tmpFile, $file)) {
-            throw new \RuntimeException(sprintf('Failed to write cache file "%s".', $file));
+        $hashFile = $this->getBaseClassesHashFile();
+        $tmpFile = tempnam(dirname($hashFile), basename($hashFile));
+        if (!is_dir(dirname($hashFile))) {
+            if (false === @mkdir(dirname($hashFile), 0777, true)) {
+                throw new \RuntimeException(sprintf('Unable to create the directory "%s".', dirname($hashFile)));
+            }
         }
-        chmod($file, 0644);
+        if (false === @file_put_contents($tmpFile, $this->getConfigFilesHash()) || !@rename($tmpFile, $hashFile)) {
+            throw new \RuntimeException(sprintf('Failed to write cache file "%s".', $hashFile));
+        }
+        chmod($hashFile, 0644);
     }
 
     protected function getBaseClassesHashFile()
@@ -201,7 +206,7 @@ class MondongoBundle extends Bundle
         }
 
         if (!$dirs) {
-            return array();
+            return 'empty';
         }
 
         $finder = new Finder();
