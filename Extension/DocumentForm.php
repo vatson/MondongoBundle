@@ -19,7 +19,7 @@
  * along with MondongoBundle. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace Bundle\MondongoBundle\Extension;
+namespace Bundle\Mondongo\MondongoBundle\Extension;
 
 use Mondongo\Mondator\Extension;
 use Mondongo\Mondator\Definition\Definition;
@@ -77,7 +77,7 @@ EOF
 
         // form base
         $this->definitions['form_base'] = $definition = new Definition($formBaseClass);
-        $definition->setParentClass('\Bundle\MondongoBundle\Form\MondongoForm');
+        $definition->setParentClass('\Bundle\Mondongo\MondongoBundle\Form\MondongoForm');
         $definition->setIsAbstract(true);
         $definition->setDocComment(<<<EOF
 /**
@@ -161,7 +161,7 @@ EOF;
             // many
             } else {
                 $code = <<<EOF
-        \$fieldGroup = new \Bundle\MondongoBundle\Form\MondongoFieldGroup('$name');
+        \$fieldGroup = new \Bundle\Mondongo\MondongoBundle\Form\MondongoFieldGroup('$name');
         foreach (\$this->getData()->$referenceGetter() as \$key => \$reference) {
             \$form = new \\$formClass(\$key, \$reference, \$this->validator);
             \$fieldGroup->add(\$form);
@@ -234,7 +234,7 @@ EOF;
             // many
             } else {
                 $code = <<<EOF
-        \$fieldGroup = new \Bundle\MondongoBundle\Form\MondongoFieldGroup('$name');
+        \$fieldGroup = new \Bundle\Mondongo\MondongoBundle\Form\MondongoFieldGroup('$name');
         foreach (\$this->getData()->$embeddedGetter() as \$key => \$embedded) {
             \$form = new \\$formClass(\$key, \$embedded, \$this->validator);
             \$fieldGroup->add(\$form);

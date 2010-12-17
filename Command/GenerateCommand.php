@@ -19,7 +19,7 @@
  * along with MondongoBundle. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace Bundle\MondongoBundle\Command;
+namespace Bundle\Mondongo\MondongoBundle\Command;
 
 use Symfony\Bundle\FrameworkBundle\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
@@ -55,7 +55,7 @@ class GenerateCommand extends Command
         $output->writeln('generating classes');
 
         foreach ($this->container->get('kernel')->getBundles() as $bundle) {
-            if ('Bundle\MondongoBundle\MondongoBundle' == get_class($bundle)) {
+            if ('Bundle\Mondongo\MondongoBundle\MondongoBundle' == get_class($bundle)) {
                 $bundle->generateAllClasses();
             }
         }

@@ -19,9 +19,9 @@
  * along with MondongoBundle. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace Bundle\MondongoBundle\DataCollector;
+namespace Bundle\Mondongo\MondongoBundle\DataCollector;
 
-use Bundle\MondongoBundle\Logger\MondongoLogger;
+use Bundle\Mondongo\MondongoBundle\Logger\MondongoLogger;
 use Symfony\Component\HttpKernel\DataCollector\DataCollector;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -40,7 +40,7 @@ class MondongoDataCollector extends DataCollector
     /**
      * Constructor.
      *
-     * @param Bundle\MondongoBundle\Logger\MondongoLogger|null $logger A Mondongo logger (optional).
+     * @param Bundle\Mondongo\MondongoBundle\Logger\MondongoLogger|null $logger A Mondongo logger (optional).
      *
      * @return void
      */

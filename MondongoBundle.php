@@ -19,7 +19,7 @@
  * along with MondongoBundle. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace Bundle\MondongoBundle;
+namespace Bundle\Mondongo\MondongoBundle;
 
 use Symfony\Component\HttpKernel\Bundle\Bundle;
 use Symfony\Component\Finder\Finder;
@@ -161,16 +161,16 @@ class MondongoBundle extends Bundle
 
         $extensions = array(
             new \Mondongo\Extension\Core(),
-            new \Bundle\MondongoBundle\Extension\KernelCacheBaseClasses(array('base_classes_dir' => $this->getBaseClassesDir())),
-            new \Bundle\MondongoBundle\Extension\DocumentValidation(),
-            new \Bundle\MondongoBundle\Extension\DocumentForm(),
+            new \Bundle\Mondongo\MondongoBundle\Extension\KernelCacheBaseClasses(array('base_classes_dir' => $this->getBaseClassesDir())),
+            new \Bundle\Mondongo\MondongoBundle\Extension\DocumentValidation(),
+            new \Bundle\Mondongo\MondongoBundle\Extension\DocumentForm(),
         );
         foreach ($this->container->findTaggedServiceIds('mondongo.extension') as $id => $attributes) {
             $extensions[] = $this->container->get($id);
         }
 
         if ($onlyBaseClasses) {
-            $extensions[] = new \Bundle\MondongoBundle\Extension\OnlyBaseClasses();
+            $extensions[] = new \Bundle\Mondongo\MondongoBundle\Extension\OnlyBaseClasses();
         }
 
         $mondator = new \Mondongo\Mondator\Mondator();

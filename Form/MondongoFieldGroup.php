@@ -19,7 +19,7 @@
  * along with MondongoBundle. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace Bundle\MondongoBundle\Form;
+namespace Bundle\Mondongo\MondongoBundle\Form;
 
 use Symfony\Component\Form\FieldGroup;
 use Symfony\Component\Form\FieldInterface;

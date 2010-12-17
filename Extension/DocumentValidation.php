@@ -19,7 +19,7 @@
  * along with MondongoBundle. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace Bundle\MondongoBundle\Extension;
+namespace Bundle\Mondongo\MondongoBundle\Extension;
 
 use Mondongo\Mondator\Extension;
 use Mondongo\Mondator\Definition\Method;
@@ -51,7 +51,7 @@ class DocumentValidation extends Extension
         \$validation = $validation;
 
         foreach (\$validation as \$getter => \$constraints) {
-            foreach (\Bundle\MondongoBundle\Extension\DocumentValidation::parseNodes(\$constraints) as \$constraint) {
+            foreach (\Bundle\Mondongo\MondongoBundle\Extension\DocumentValidation::parseNodes(\$constraints) as \$constraint) {
                 \$metadata->addGetterConstraint(\$getter, \$constraint);
             }
         }

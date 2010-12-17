@@ -19,7 +19,7 @@
  * along with MondongoBundle. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace Bundle\MondongoBundle\Extension;
+namespace Bundle\Mondongo\MondongoBundle\Extension;
 
 use Mondongo\Mondator\Extension;
 
