@@ -21,8 +21,10 @@
 
 namespace Bundle\Mondongo\MondongoBundle\Security;
 
+use Symfony\Component\Security\User\AccountInterface;
 use Symfony\Component\Security\User\UserProviderInterface;
 use Symfony\Component\Security\Exception\UsernameNotFoundException;
+use Symfony\Component\Security\Exception\UnsupportedAccountException;
 use Mondongo\Mondongo;
 
 /**
@@ -34,7 +36,7 @@ use Mondongo\Mondongo;
 class DocumentUserProvider implements UserProviderInterface
 {
     protected $mondongo;
-    protected $repository;
+    protected $class;
     protected $field;
 
     /**
@@ -46,9 +48,9 @@ class DocumentUserProvider implements UserProviderInterface
      */
     public function __construct(Mondongo $mondongo, $class, $field = null)
     {
-        $this->mondongo   = $mondongo;
-        $this->repository = $mondongo->getRepository($class);
-        $this->field      = $field;
+        $this->mondongo = $mondongo;
+        $this->class    = $class;
+        $this->field    = $field;
     }
 
     /**
@@ -56,14 +58,16 @@ class DocumentUserProvider implements UserProviderInterface
      */
     public function loadUserByUsername($username)
     {
+        $repository = $this->mondongo->getRepository($this->class);
+
         if ($this->field) {
-            $user = $this->repository->findOne(array($this->field => $username));
+            $user = $repository->findOne(array($this->field => $username));
         } else {
-            if (!$this->repository instanceof UserProviderInterface) {
+            if (!$repository instanceof UserProviderInterface) {
                 throw new \InvalidArgumentException(sprintf('The Mondongo repository "%s" must implement UserProviderInterface.', get_class($this->repository)));
             }
 
-            $user = $this->repository->loadUserByUsername($username);
+            $user = $repository->loadUserByUsername($username);
         }
 
         if (null === $user) {
@@ -71,5 +75,17 @@ class DocumentUserProvider implements UserProviderInterface
         }
 
         return $user;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function loadUserByAccount(AccountInterface $account)
+    {
+        if (!$account instanceof $this->class) {
+            throw new UnsupportedAccountException(sprintf('Instances of "%s" are not supported.', get_class($account)));
+        }
+
+        return $this->loadUserByUsername((string) $account);
     }
 }
