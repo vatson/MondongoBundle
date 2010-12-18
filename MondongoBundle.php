@@ -22,6 +22,7 @@
 namespace Bundle\Mondongo\MondongoBundle;
 
 use Symfony\Component\HttpKernel\Bundle\Bundle;
+use Symfony\Component\EventDispatcher\Event;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\Yaml\Yaml;
 
@@ -41,7 +42,8 @@ class MondongoBundle extends Bundle
         \Mondongo\Container::clear();
         \Mondongo\Container::setLoader(array($this, 'loadMondongo'));
 
-        $this->initializeBaseClasses();
+        $this->container->get('event_dispatcher')->connect('core.request', array($this, 'initializeBaseClasses'));
+
         spl_autoload_register(array($this, 'loadBaseClasses'));
     }
 
@@ -72,7 +74,7 @@ class MondongoBundle extends Bundle
     /**
      * Initialize the base classes.
      */
-    protected function initializeBaseClasses()
+    public function initializeBaseClasses()
     {
         $reload = false;
         if ($this->container->getParameter('kernel.debug')) {
@@ -159,6 +161,11 @@ class MondongoBundle extends Bundle
             }
         }
 
+        // filter config classes
+        $event = $this->container->get('event_dispatcher')->filter(new Event($this, 'mondongo.config_classes'), $configClasses);
+        $configClasses = $event->getReturnValue();
+
+        // extensions
         $extensions = array(
             new \Mondongo\Extension\Core(),
             new \Bundle\Mondongo\MondongoBundle\Extension\KernelCacheBaseClasses(array('base_classes_dir' => $this->getBaseClassesDir())),
@@ -173,11 +180,13 @@ class MondongoBundle extends Bundle
             $extensions[] = new \Bundle\Mondongo\MondongoBundle\Extension\OnlyBaseClasses();
         }
 
+        // mondator
         $mondator = new \Mondongo\Mondator\Mondator();
         $mondator->setConfigClasses($configClasses);
         $mondator->setExtensions($extensions);
         $mondator->process();
 
+        // hash
         $hashFile = $this->getBaseClassesHashFile();
         $tmpFile = tempnam(dirname($hashFile), basename($hashFile));
         if (!is_dir(dirname($hashFile))) {
