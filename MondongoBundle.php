@@ -168,6 +168,7 @@ class MondongoBundle extends Bundle
         // extensions
         $extensions = array(
             new \Mondongo\Extension\Core(),
+            new \Mondongo\Extension\DocumentDataMap(),
             new \Bundle\Mondongo\MondongoBundle\Extension\KernelCacheBaseClasses(array('base_classes_dir' => $this->getBaseClassesDir())),
             new \Bundle\Mondongo\MondongoBundle\Extension\DocumentValidation(),
             new \Bundle\Mondongo\MondongoBundle\Extension\DocumentForm(),

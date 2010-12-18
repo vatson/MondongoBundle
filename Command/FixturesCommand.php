@@ -24,15 +24,16 @@ namespace Bundle\Mondongo\MondongoBundle\Command;
 use Symfony\Bundle\FrameworkBundle\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use Mondongo\Mondator\Mondator;
+use Symfony\Component\Finder\Finder;
+use Symfony\Component\Yaml\Yaml;
 
 /**
- * GenerateCommand.
+ * FixturesCommand.
  *
  * @package MondongoBundle
  * @author  Pablo Díez Pascual <pablodip@gmail.com>
  */
-class GenerateCommand extends Command
+class FixturesCommand extends Command
 {
     /**
      * {@inheritdoc}
@@ -40,8 +41,8 @@ class GenerateCommand extends Command
     protected function configure()
     {
         $this
-            ->setName('mondongo:generate')
-            ->setDescription('Generate documents classes from config classes.')
+            ->setName('mondongo:fixtures')
+            ->setDescription('Load the fixtures.')
         ;
     }
 
@@ -50,12 +51,28 @@ class GenerateCommand extends Command
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $output->writeln('generating classes');
+        $output->writeln('processing fixtures');
 
+        $data = array();
         foreach ($this->container->get('kernel')->getBundles() as $bundle) {
-            if ('Bundle\Mondongo\MondongoBundle\MondongoBundle' == get_class($bundle)) {
-                $bundle->generateAllClasses();
+            if (is_dir($dir = $bundle->getPath().'/Resources/fixtures/mondongo'))
+            {
+                $finder = new Finder();
+                foreach ($finder->files()->name('*.yml')->followLinks()->in($dir) as $file) {
+                    $data = \Bundle\Mondongo\MondongoBundle\MondongoBundle::arrayDeepMerge($data, (array) Yaml::load($file));
+                }
             }
         }
+
+        if (!$data) {
+            $output->writeln('there are not fixtures');
+
+            return;
+        }
+
+        $output->writeln('loading fixtures');
+
+        $data = new \Mondongo\Data($this->container->get('mondongo'), $data);
+        $data->load(true);
     }
 }
