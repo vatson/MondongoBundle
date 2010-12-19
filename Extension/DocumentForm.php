@@ -104,9 +104,10 @@ EOF
     {
         $code = '';
         foreach ($this->configClass['fields'] as $name => $field) {
-            $fieldClass = $this->getFieldClassForType($field['type']);
+            list($fieldClass, $fieldOptions) = $this->getFormFieldForDocumentField($name, $field);
+            $fieldOptions = \Mondongo\Mondator\Dumper::exportArray($fieldOptions, 12);
             $code .= <<<EOF
-        \$this->add(new \\$fieldClass('$name'));
+        \$this->add(new \\$fieldClass('$name', $fieldOptions));
 
 EOF;
         }
@@ -122,20 +123,51 @@ EOF
         $this->definitions['form_base']->addMethod($method);
     }
 
-    protected function getFieldClassForType($type)
+    protected function getFormFieldForDocumentField($name, $documentField)
     {
-        switch ($type)
-        {
-            case 'date':
-                return 'Symfony\Component\Form\DateTimeField';
-            case 'integer':
-                return 'Symfony\Component\Form\IntegerField';
-            case 'float':
-                return 'Symfony\Component\Form\NumberField';
-            case 'string':
-            default:
-                return 'Symfony\Component\Form\TextField';
+        $class   = null;
+        $options = array();
+
+        if (in_array($documentField['type'], array('reference_one', 'reference_many'))) {
+            $reference = null;
+            foreach ($this->configClass['references'] as $referenceName => $ref) {
+                if ($name == $ref['field']) {
+                    $reference = $ref;
+                    break;
+                }
+            }
+            if (null === $reference) {
+                throw new \RuntimeException(sprintf('The reference for the field "%s" does not exists.', $name));
+            }
+
+            $class = 'Bundle\Mondongo\MondongoBundle\Form\MondongoChoiceField';
+            $options['class'] = $reference['class'];
+            if ('one' == $reference['type']) {
+                $options['add_empty'] = true;
+            } elseif ('many' == $reference['type']) {
+                $options['multiple'] = true;
+            }
         }
+
+        if (null === $class) {
+            switch ($documentField['type'])
+            {
+                case 'date':
+                    $class = 'Symfony\Component\Form\DateTimeField';
+                    break;
+                case 'integer':
+                    $class = 'Symfony\Component\Form\IntegerField';
+                    break;
+                case 'float':
+                    $class = 'Symfony\Component\Form\NumberField';
+                    break;
+                case 'string':
+                default:
+                    $class = 'Symfony\Component\Form\TextField';
+            }
+        }
+
+        return array($class, $options);
     }
 
     /*

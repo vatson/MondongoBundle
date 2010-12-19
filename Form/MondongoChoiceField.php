@@ -36,16 +36,10 @@ class MondongoChoiceField extends ChoiceField
      */
     protected function configure()
     {
-        $this->addRequiredOption('mondongo');
-        $this->addRequiredOption('document_class');
-        $this->addOption('document_field');
+        $this->addRequiredOption('class');
+        $this->addOption('method', '__toString');
         $this->addOption('find_options', array());
-        $this->addOption('empty_choice');
-
-        $mondongo = $this->getOption('mondongo');
-        if (!$mondongo instanceof \Mondongo\Mondongo) {
-            throw new \InvalidArgumentException('The "mondongo" option must be an instance of \Mondongo\Mondongo.');
-        }
+        $this->addOption('add_empty');
 
         if (!is_array($this->getOption('find_options'))) {
             throw new \InvalidArgumentException('The "find_options" option must be an array.');
@@ -54,19 +48,18 @@ class MondongoChoiceField extends ChoiceField
         // choices
         $choices = array();
 
-        // empty choice
-        if ($this->getOption('empty_choice') && !$this->getOption('multiple') && !$this->getOption('expanded')) {
+        // add empty
+        if ($this->getOption('add_empty') && !$this->getOption('multiple') && !$this->getOption('expanded')) {
             $choices[''] = '';
         }
 
         // query
-        foreach ($mondongo->getRepository($this->getOption('document_class'))->find($this->getOption('find_options')) as $document) {
-            if ($field = $this->getOption('document_field')) {
-                $value = $document->get($field);
-            } else {
-                $value = $document->getId()->__toString();
-            }
-            $choices[$document->getId()->__toString()] = $value;
+        $documents = \Mondongo\Container::get()
+            ->getRepository($this->getOption('class'))
+            ->find($this->getOption('find_options'))
+        ;
+        foreach ($documents as $document) {
+            $choices[$document->getId()->__toString()] = $document->{$this->getOption('method')}();
         }
         $this->addOption('choices', $choices);
 
