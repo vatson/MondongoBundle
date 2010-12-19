@@ -38,8 +38,13 @@ class MondongoChoiceField extends ChoiceField
     {
         $this->addRequiredOption('class');
         $this->addOption('method', '__toString');
+        $this->addOption('query', array());
         $this->addOption('find_options', array());
         $this->addOption('add_empty');
+
+        if (!is_array($this->getOption('query'))) {
+            throw new \InvalidArgumentException('The "query" options must be an array.');
+        }
 
         if (!is_array($this->getOption('find_options'))) {
             throw new \InvalidArgumentException('The "find_options" option must be an array.');
@@ -56,7 +61,7 @@ class MondongoChoiceField extends ChoiceField
         // query
         $documents = \Mondongo\Container::get()
             ->getRepository($this->getOption('class'))
-            ->find($this->getOption('find_options'))
+            ->find($this->getOption('query'), $this->getOption('find_options'))
         ;
         foreach ($documents as $document) {
             $choices[$document->getId()->__toString()] = $document->{$this->getOption('method')}();

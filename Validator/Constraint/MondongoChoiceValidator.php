@@ -54,12 +54,14 @@ class MondongoChoiceValidator extends ConstraintValidator
                     }
                 }
 
-                if (
-                    $isValid
-                    &&
-                    count($value) !== \Mondongo\Container::get()->getRepository($constraint->class)->count(array('_id' => array('$in' => $value)))
-                ) {
-                    $isValid = false;
+                if ($isValid) {
+                    $count = \Mondongo\Container::get()
+                        ->getRepository($constraint->class)
+                        ->count(array_merge($constraint->query, array('_id' => array('$in' => $value))))
+                    ;
+                    if (count($value) != $count) {
+                        $isValid = false;
+                    }
                 }
             }
         // unique
@@ -67,7 +69,7 @@ class MondongoChoiceValidator extends ConstraintValidator
             if (
                 !$value instanceof \MongoId
                 ||
-                null === \Mondongo\Container::get()->getRepository($constraint->class)->findOneById($value)
+                null === \Mondongo\Container::get()->getRepository($constraint->class)->findOne(array_merge($constraint->query, array('_id' => $value)))
             ) {
                 $isValid = false;
             }

@@ -34,6 +34,7 @@ class MondongoChoice extends Constraint
     public $message = 'This value is not valid.';
     public $class;
     public $multiple = false;
+    public $query = array();
 
     /**
      * {@inheritdoc}
