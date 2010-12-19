@@ -105,8 +105,10 @@ EOF
      */
     static protected function newConstraint($name, $options)
     {
-        if (strpos($name, '\\') !== false && class_exists($name)) {
-            $className = (string)$name;
+        if (false !== strpos($name, '\\') && class_exists($name)) {
+            $className = (string) $name;
+        } elseif ('MondongoDocument' == $name) {
+            $className = 'Bundle\Mondongo\MondongoBundle\Validator\Constraint\MondongoDocument';
         } else {
             $className = 'Symfony\\Component\\Validator\\Constraints\\'.$name;
         }
