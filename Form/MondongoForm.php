@@ -58,4 +58,18 @@ class MondongoForm extends Form
 
         return $field;
     }
+
+    /**
+     * Remove all visible fields except the fields indicated in the argument.
+     *
+     * @param array $fields The fields.
+     */
+    public function useFields(array $fields)
+    {
+        foreach ($this as $field) {
+            if (!$field->isHidden() && !in_array($field->getKey(), $fields)) {
+                $this->remove($field->getKey());
+            }
+        }
+    }
 }
