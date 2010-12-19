@@ -25,12 +25,12 @@ use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\ConstraintValidator;
 
 /**
- * MondongoDocument
+ * MondongoChoiceValidator.
  *
  * @package MondongoBundle
  * @author  Pablo Díez Pascual <pablodip@gmail.com>
  */
-class MondongoDocumentValidator extends ConstraintValidator
+class MondongoChoiceValidator extends ConstraintValidator
 {
     /**
      * {@inheritdoc}

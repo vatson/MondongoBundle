@@ -107,8 +107,8 @@ EOF
     {
         if (false !== strpos($name, '\\') && class_exists($name)) {
             $className = (string) $name;
-        } elseif ('MondongoDocument' == $name) {
-            $className = 'Bundle\Mondongo\MondongoBundle\Validator\Constraint\MondongoDocument';
+        } elseif ('MondongoChoice' == $name) {
+            $className = 'Bundle\Mondongo\MondongoBundle\Validator\Constraint\MondongoChoice';
         } else {
             $className = 'Symfony\\Component\\Validator\\Constraints\\'.$name;
         }

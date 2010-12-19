@@ -24,12 +24,12 @@ namespace Bundle\Mondongo\MondongoBundle\Validator\Constraint;
 use Symfony\Component\Validator\Constraint;
 
 /**
- * MondongoDocument
+ * MondongoChoice.
  *
  * @package MondongoBundle
  * @author  Pablo Díez Pascual <pablodip@gmail.com>
  */
-class MondongoDocument extends Constraint
+class MondongoChoice extends Constraint
 {
     public $message = 'This value is not valid.';
     public $class;
