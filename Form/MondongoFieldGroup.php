@@ -44,14 +44,13 @@ class MondongoFieldGroup extends FieldGroup
         $this->fields[$field->getKey()] = $field;
 
         $field->setParent($this);
-        $field->setLocale($this->locale);
 
         if (!$field instanceof MondongoForm) {
             $data = $this->getTransformedData();
 
             // if the property "data" is NULL, getTransformedData() returns an empty
             // string
-            if (!empty($data) && $field->getPropertyPath() !== null) {
+            if (!empty($data)) {
                 $field->updateFromObject($data);
             }
         }
