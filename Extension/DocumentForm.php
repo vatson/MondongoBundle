@@ -187,7 +187,8 @@ EOF
             \$reference = new \\{$reference['class']}();
             \$this->getData()->$referenceSetter(\$reference);
         }
-        \$form = new \\$formClass('$name', \$reference, \$this->validator);
+        \$form = new \\$formClass('$name', \$reference);
+        \$form->setPropertyPath('$name');
         \$this->add(\$form);
 EOF;
             // many
@@ -195,7 +196,8 @@ EOF;
                 $code = <<<EOF
         \$fieldGroup = new \Bundle\Mondongo\MondongoBundle\Form\MondongoFieldGroup('$name');
         foreach (\$this->getData()->$referenceGetter() as \$key => \$reference) {
-            \$form = new \\$formClass(\$key, \$reference, \$this->validator);
+            \$form = new \\$formClass(\$key, \$reference);
+            \$form->setPropertyPath(\$key);
             \$fieldGroup->add(\$form);
         }
         \$this->add(\$fieldGroup);
@@ -260,7 +262,8 @@ EOF
             // one
             if ('one' == $embedded['type']) {
                 $code = <<<EOF
-        \$form = new \\$formClass('$name', \$this->getData()->$embeddedGetter(), \$this->validator);
+        \$form = new \\$formClass('$name', \$this->getData()->$embeddedGetter());
+        \$form->setPropertyPath('$name');
         \$this->add(\$form);
 EOF;
             // many
@@ -268,7 +271,8 @@ EOF;
                 $code = <<<EOF
         \$fieldGroup = new \Bundle\Mondongo\MondongoBundle\Form\MondongoFieldGroup('$name');
         foreach (\$this->getData()->$embeddedGetter() as \$key => \$embedded) {
-            \$form = new \\$formClass(\$key, \$embedded, \$this->validator);
+            \$form = new \\$formClass(\$key, \$embedded);
+            \$form->setPropertyPath(\$key);
             \$fieldGroup->add(\$form);
         }
         \$this->add(\$fieldGroup);
