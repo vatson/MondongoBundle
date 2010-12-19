@@ -26,6 +26,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\Yaml\Yaml;
+use Mondongo\DataLoader;
 
 /**
  * FixturesCommand.
@@ -72,7 +73,7 @@ class FixturesCommand extends Command
 
         $output->writeln('loading fixtures');
 
-        $data = new \Mondongo\Data($this->container->get('mondongo'), $data);
-        $data->load(true);
+        $dataLoader = new DataLoader($this->container->get('mondongo'), $data);
+        $dataLoader->load(true);
     }
 }
