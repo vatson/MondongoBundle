@@ -41,9 +41,37 @@ class DocumentValidation extends Extension
     {
         $validation = array();
         foreach ($this->configClass['fields'] as $name => $field) {
-            if (isset($field['validation']) && $field['validation']) {
-                $validation[Inflector::camelize($name)] = $field['validation'];
+            // base
+            $baseFieldValidation = array();
+            if (in_array($field['type'], array('reference_one', 'reference_many'))) {
+                foreach ($this->configClass['references'] as $referenceName => $reference) {
+                    if ($reference['field'] == $name) {
+                        break;
+                    }
+                }
+                $baseFieldValidation[] = array('Bundle\Mondongo\MondongoBundle\Validator\Constraint\MondongoChoice' => array(
+                    'class'    => $reference['class'],
+                    'multiple' => 'many' == $reference['type'],
+                ));
             }
+
+            // custom
+            $customFieldValidation = array();
+            // notnull
+            if (isset($field['notnull']) && $field['notnull']) {
+                $customFieldValidation[] = array('NotNull' => null);
+            }
+            // notblank
+            if (isset($field['notblank']) && $field['notblank']) {
+                $customFieldValidation[] = array('NotBlank' => null);
+            }
+            // explicit
+            if (isset($field['validation']) && $field['validation']) {
+                $customFieldValidation = array_merge($customFieldValidation, $field['validation']);
+            }
+
+            // merge
+            $validation[Inflector::camelize($name)] = array_merge_recursive($customFieldValidation, $baseFieldValidation);
         }
         $validation = Dumper::exportArray($validation, 12);
 
