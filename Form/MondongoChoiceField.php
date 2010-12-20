@@ -63,9 +63,13 @@ class MondongoChoiceField extends ChoiceField
             ->getRepository($this->getOption('class'))
             ->find($this->getOption('query'), $this->getOption('find_options'))
         ;
-        foreach ($documents as $document) {
-            $choices[$document->getId()->__toString()] = $document->{$this->getOption('method')}();
+        if ($documents) {
+            foreach ($documents as $document) {
+                $choices[$document->getId()->__toString()] = $document->{$this->getOption('method')}();
+            }
         }
+
+        // choices
         $this->addOption('choices', $choices);
 
         parent::configure();
