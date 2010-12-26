@@ -42,7 +42,9 @@ class DocumentForm extends Extension
     {
         $this->processInitDefinitionsAndOutputs();
 
-        $this->processFormConfigureMethod();
+        $this->processFormAddFieldsMethods();
+        $this->processFormAddDocumentFieldMethod();
+        $this->processFormAddDocumentFieldsMethod();
         $this->processFormAddReferencesMethods();
         $this->processFormAddReferenceMethod();
         $this->processFormAddEmbeddedsMethods();
@@ -75,6 +77,19 @@ class DocumentForm extends Extension
 EOF
         );
 
+        $method = new Method('protected', 'configure', '', <<<EOF
+        \$this->addDocumentFields(array(
+        ));
+EOF
+        );
+        $method->setDocComment(<<<EOF
+    /**
+     * {@inheritdoc}
+     */
+EOF
+        );
+        $definition->addMethod($method);
+
         // form base
         $this->definitions['form_base'] = $definition = new Definition($formBaseClass);
         $definition->setParentClass('\Bundle\Mondongo\MondongoBundle\Form\MondongoForm');
@@ -97,30 +112,28 @@ EOF
         $this->outputs['form_base'] = new Output($this->outputs['document_base']->getDir(), true);
     }
 
-    /**
-     * Form "configure"
+    /*
+     * Form add fields methods.
      */
-    protected function processFormConfigureMethod()
+    protected function processFormAddFieldsMethods()
     {
         $code = '';
         foreach ($this->configClass['fields'] as $name => $field) {
             list($fieldClass, $fieldOptions) = $this->getFormFieldForDocumentField($name, $field);
             $fieldOptions = \Mondongo\Mondator\Dumper::exportArray($fieldOptions, 12);
-            $code .= <<<EOF
-        \$this->add(new \\$fieldClass('$name', $fieldOptions));
 
-EOF;
-        }
-
-        $method = new Method('protected', 'configure', '', $code);
-        $method->setDocComment(<<<EOF
+            $method = new Method('public', 'add'.Inflector::camelize($name).'DocumentField', 'array $options = array()', <<<EOF
+        \$this->add(new \\$fieldClass('$name', array_merge($fieldOptions, \$options)));
+EOF
+            );
+            $method->setDocComment(<<<EOF
     /**
-     * {@inheritDoc}
+     * Add the field for the "$name" field.
      */
 EOF
-        );
-
-        $this->definitions['form_base']->addMethod($method);
+            );
+            $this->definitions['form_base']->addMethod($method);
+        }
     }
 
     protected function getFormFieldForDocumentField($name, $documentField)
@@ -168,6 +181,65 @@ EOF
         }
 
         return array($class, $options);
+    }
+
+    /*
+     * Form "addDocumentField" method.
+     */
+    protected function processFormAddDocumentFieldMethod()
+    {
+        $code = '';
+        foreach ($this->configClass['fields'] as $name => $field) {
+            $fieldMethod = 'add'.Inflector::camelize($name).'DocumentField';
+
+            $code .= <<<EOF
+        if ('$name' == \$name) {
+            \$this->$fieldMethod(\$options); return;
+        }
+EOF;
+        }
+        $code .= <<<EOF
+
+        throw new \InvalidArgumentException(sprintf('The document field "%s" does not exist.', \$name));
+EOF;
+
+        $method = new Method('public', 'addDocumentField', '$name, array $options = array()', $code);
+        $method->setDocComment(<<<EOF
+    /**
+     * Add a document field.
+     *
+     * @param string \$name    The field name.
+     * @param array  \$options The options (optional).
+     */
+EOF
+        );
+        $this->definitions['form_base']->addMethod($method);
+    }
+
+    /*
+     * Form "addDocumentFields" method.
+     */
+    protected function processFormAddDocumentFieldsMethod()
+    {
+        $method = new Method('public', 'addDocumentFields', 'array $fields', <<<EOF
+        foreach (\$fields as \$name => \$options) {
+            if (is_numeric(\$name)) {
+                \$name = \$options;
+                \$options = array();
+            }
+            \$this->addDocumentField(\$name, \$options);
+        }
+EOF
+        );
+        $method->setDocComment(<<<EOF
+    /**
+     * Add document fields
+     *
+     * @param array \$fields An array of document fields.
+     */
+EOF
+        );
+        $this->definitions['form_base']->addMethod($method);
     }
 
     /*
