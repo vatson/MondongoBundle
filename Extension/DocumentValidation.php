@@ -39,7 +39,17 @@ class DocumentValidation extends Extension
      */
     protected function doProcess()
     {
-        $validation = array();
+        $validation = array(
+            'constraints' => array(),
+            'getters'     => array(),
+        );
+
+        // constraints
+        if (isset($this->configClass['constraints'])) {
+            $validation['constraints'] = $this->configClass['constraints'];
+        }
+
+        // getters
         foreach ($this->configClass['fields'] as $name => $field) {
             // base
             $baseFieldValidation = array();
@@ -71,14 +81,19 @@ class DocumentValidation extends Extension
             }
 
             // merge
-            $validation[Inflector::camelize($name)] = array_merge_recursive($customFieldValidation, $baseFieldValidation);
+            $validation['getters'][Inflector::camelize($name)] = array_merge_recursive($customFieldValidation, $baseFieldValidation);
         }
+
         $validation = Dumper::exportArray($validation, 12);
 
         $method = new Method('public', 'loadValidatorMetadata', '\Symfony\Component\Validator\Mapping\ClassMetadata $metadata', <<<EOF
         \$validation = $validation;
 
-        foreach (\$validation as \$getter => \$constraints) {
+        foreach (\Bundle\Mondongo\MondongoBundle\Extension\DocumentValidation::parseNodes(\$validation['constraints']) as \$constraint) {
+            \$metadata->addConstraint(\$constraint);
+        }
+
+        foreach (\$validation['getters'] as \$getter => \$constraints) {
             foreach (\Bundle\Mondongo\MondongoBundle\Extension\DocumentValidation::parseNodes(\$constraints) as \$constraint) {
                 \$metadata->addGetterConstraint(\$getter, \$constraint);
             }
@@ -137,6 +152,8 @@ EOF
             $className = (string) $name;
         } elseif ('MondongoChoice' == $name) {
             $className = 'Bundle\Mondongo\MondongoBundle\Validator\Constraint\MondongoChoice';
+        } elseif ('MondongoUnique' == $name) {
+            $className = 'Bundle\Mondongo\MondongoBundle\Validator\Constraint\MondongoUnique';
         } else {
             $className = 'Symfony\\Component\\Validator\\Constraints\\'.$name;
         }
