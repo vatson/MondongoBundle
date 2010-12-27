@@ -22,7 +22,6 @@
 namespace Bundle\Mondongo\MondongoBundle;
 
 use Symfony\Component\HttpKernel\Bundle\Bundle;
-use Symfony\Component\EventDispatcher\Event;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\Yaml\Yaml;
 
@@ -42,7 +41,7 @@ class MondongoBundle extends Bundle
         \Mondongo\Container::clear();
         \Mondongo\Container::setLoader(array($this, 'loadMondongo'));
 
-        $this->container->get('event_dispatcher')->connect('core.request', array($this, 'initializeBaseClasses'));
+        $this->initializeBaseClasses();
 
         spl_autoload_register(array($this, 'loadBaseClasses'));
     }
@@ -74,7 +73,7 @@ class MondongoBundle extends Bundle
     /**
      * Initialize the base classes.
      */
-    public function initializeBaseClasses()
+    protected function initializeBaseClasses()
     {
         $reload = false;
         if ($this->container->getParameter('kernel.debug')) {
@@ -161,9 +160,12 @@ class MondongoBundle extends Bundle
             }
         }
 
-        // filter config classes
-        $event = $this->container->get('event_dispatcher')->filter(new Event($this, 'mondongo.config_classes'), $configClasses);
-        $configClasses = $event->getReturnValue();
+        // final classes
+        foreach ($configClasses as $class => &$configClass) {
+            if (isset($configClass['final_class']) && 0 === strpos($configClass['final_class'], '|')) {
+                $configClass['final_class'] = $this->container->getParameter(substr($configClass['final_class'], 1));
+            }
+        }
 
         // extensions
         $extensions = array(
