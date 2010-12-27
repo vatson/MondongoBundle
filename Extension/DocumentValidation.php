@@ -45,8 +45,8 @@ class DocumentValidation extends Extension
         );
 
         // constraints
-        if (isset($this->configClass['constraints'])) {
-            $validation['constraints'] = $this->configClass['constraints'];
+        if (isset($this->configClass['validation'])) {
+            $validation['constraints'] = $this->configClass['validation'];
         }
 
         // getters
