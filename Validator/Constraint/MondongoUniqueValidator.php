@@ -63,7 +63,7 @@ class MondongoUniqueValidator extends ConstraintValidator
             ->findOne($query, array('_id' => 1))
         ;
 
-        if (null === $result) {
+        if (null === $result || $value->getId() == $result['_id']) {
             return true;
         }
 
