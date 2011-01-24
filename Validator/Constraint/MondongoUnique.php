@@ -42,4 +42,12 @@ class MondongoUnique extends Constraint
     {
         return array('fields');
     }
+    
+    /**
+      * {@inheritDoc}
+      */
+     public function targets()
+     {
+         return array(self::CLASS_CONSTRAINT, self::PROPERTY_CONSTRAINT);
+     }
 }

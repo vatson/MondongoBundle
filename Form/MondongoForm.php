@@ -22,7 +22,6 @@
 namespace Bundle\Mondongo\MondongoBundle\Form;
 
 use Symfony\Component\Form\Form;
-use Symfony\Component\Form\FieldInterface;
 use Mondongo\Inflector;
 
 /**
@@ -36,7 +35,7 @@ class MondongoForm extends Form
     /**
      * {@inheritdoc}
      */
-    public function add(FieldInterface $field)
+    public function add($field)
     {
         if ($this->isBound()) {
             throw new AlreadyBoundException('You cannot add fields after binding a form');

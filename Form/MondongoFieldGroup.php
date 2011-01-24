@@ -22,7 +22,6 @@
 namespace Bundle\Mondongo\MondongoBundle\Form;
 
 use Symfony\Component\Form\FieldGroup;
-use Symfony\Component\Form\FieldInterface;
 
 /**
  * MondongoFieldGroup.
@@ -35,7 +34,7 @@ class MondongoFieldGroup extends FieldGroup
     /**
      * {@inheritdoc}
      */
-    public function add(FieldInterface $field)
+    public function add($field)
     {
         if ($this->isBound()) {
             throw new AlreadyBoundException('You cannot add fields after binding a form');

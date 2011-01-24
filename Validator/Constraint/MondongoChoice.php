@@ -43,4 +43,12 @@ class MondongoChoice extends Constraint
     {
         return array('class');
     }
+    
+    /**
+      * {@inheritDoc}
+      */
+     public function targets()
+     {
+         return self::PROPERTY_CONSTRAINT;
+     }
 }

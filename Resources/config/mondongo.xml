@@ -8,6 +8,9 @@
     <!-- mondongo -->
     <parameter key="mondongo.class">Mondongo\Mondongo</parameter>
 
+    <!-- mondator -->
+    <parameter key="mondongo.mondator_class">Mondongo\Mondator\Mondator</parameter>
+
     <!-- logger -->
     <parameter key="mondongo.logger_class">Bundle\Mondongo\MondongoBundle\Logger\MondongoLogger</parameter>
 
@@ -18,6 +21,10 @@
   <services>
     <!-- mondongo -->
     <service id="mondongo" class="%mondongo.class%">
+    </service>
+
+    <!-- mondator -->
+    <service id="mondongo.mondator" class="%mondongo.mondator_class%">
     </service>
 
     <!-- logger -->

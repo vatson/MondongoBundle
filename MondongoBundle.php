@@ -22,6 +22,8 @@
 namespace Bundle\Mondongo\MondongoBundle;
 
 use Symfony\Component\HttpKernel\Bundle\Bundle;
+use Symfony\Component\DependencyInjection\ContainerBuilder;
+use Bundle\Mondongo\MondongoBundle\DependencyInjection\Compiler\MondongoMondatorPass;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\Yaml\Yaml;
 
@@ -52,6 +54,13 @@ class MondongoBundle extends Bundle
     public function shutdown()
     {
         spl_autoload_unregister(array($this, 'loadBaseClasses'));
+    }
+
+    public function registerExtensions(ContainerBuilder $container)
+    {
+        parent::registerExtensions($container);
+
+        $container->addCompilerPass(new MondongoMondatorPass());
     }
 
     /**
@@ -167,7 +176,9 @@ class MondongoBundle extends Bundle
             }
         }
 
-        // extensions
+        // mondator
+        $mondator = $this->container->get('mondongo.mondator');
+
         $extensions = array(
             new \Mondongo\Extension\Core(),
             new \Mondongo\Extension\DocumentDataMap(),
@@ -175,18 +186,13 @@ class MondongoBundle extends Bundle
             new \Bundle\Mondongo\MondongoBundle\Extension\DocumentValidation(),
             new \Bundle\Mondongo\MondongoBundle\Extension\DocumentForm(),
         );
-        foreach ($this->container->findTaggedServiceIds('mondongo.extension') as $id => $attributes) {
-            $extensions[] = $this->container->get($id);
-        }
-
+        $extensions = array_merge($extensions, $mondator->getExtensions());
         if ($onlyBaseClasses) {
             $extensions[] = new \Bundle\Mondongo\MondongoBundle\Extension\OnlyBaseClasses();
         }
 
-        // mondator
-        $mondator = new \Mondongo\Mondator\Mondator();
-        $mondator->setConfigClasses($configClasses);
         $mondator->setExtensions($extensions);
+        $mondator->setConfigClasses($configClasses);
         $mondator->process();
 
         // hash
@@ -231,6 +237,22 @@ class MondongoBundle extends Bundle
         }
 
         return sha1(serialize($files));
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getNamespace()
+    {
+        return __NAMESPACE__;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getPath()
+    {
+        return strtr(__DIR__, '\\', '/');
     }
 
     /*

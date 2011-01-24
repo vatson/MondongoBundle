@@ -43,13 +43,18 @@ class MondongoExtension extends Extension
      *
      * @return void
      */
-    public function configLoad($config, ContainerBuilder $container)
+    public function configLoad(array $configs, ContainerBuilder $container)
     {
-        if (!$container->hasDefinition('mondongo')) {
-            $loader = new XmlFileLoader($container, __DIR__.'/../Resources/config');
-            $loader->load('mondongo.xml');
+        $loader = new XmlFileLoader($container, __DIR__.'/../Resources/config');
+        $loader->load('mondongo.xml');
+        
+        foreach ($configs as $config) {
+            $this->doConfigLoad($config, $container);
         }
-
+    }
+    
+    protected function doConfigLoad($config, $container)
+    {
         // override defaults parameters
         foreach (array('class') as $parameter) {
             if (isset($config[$parameter])) {
@@ -58,6 +63,7 @@ class MondongoExtension extends Extension
         }
 
         // connections
+        $defaultConnection = null;
         if (isset($config['connections'])) {
             foreach ($config['connections'] as $name => $connection) {
                 // Mondongo\Connection
@@ -77,6 +83,15 @@ class MondongoExtension extends Extension
                     $name,
                     new Reference($connectionDefinitionName),
                 ));
+                
+                // default?
+                if (isset($connection['default']) && $connection['default']) {
+                    if (null !== $defaultConnection) {
+                        throw new \RuntimeException('You can define only one connection like the default connection.');
+                    }
+                    $defaultConnection = $name;
+                    $container->getDefinition('mondongo')->addMethodCall('setDefaultConnectionName', array($name));
+                }
             }
         }
 
