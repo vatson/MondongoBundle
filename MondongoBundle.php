@@ -59,8 +59,6 @@ class MondongoBundle extends Bundle
     public function registerExtensions(ContainerBuilder $container)
     {
         parent::registerExtensions($container);
-
-        $container->addCompilerPass(new MondongoMondatorPass());
     }
 
     /**
@@ -252,6 +250,10 @@ class MondongoBundle extends Bundle
      */
     public function getPath()
     {
+        if (null === $this->name) {
+            $this->initReflection();
+        }
+        
         return strtr(__DIR__, '\\', '/');
     }
 
