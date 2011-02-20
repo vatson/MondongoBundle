@@ -19,13 +19,12 @@
  * along with MondongoBundle. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace Bundle\Mondongo\MondongoBundle;
+namespace Mondongo\MondongoBundle;
 
 use Symfony\Component\HttpKernel\Bundle\Bundle;
+use Mondongo\Container as MondongoContainer;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
-use Bundle\Mondongo\MondongoBundle\DependencyInjection\Compiler\MondongoMondatorPass;
-use Symfony\Component\Finder\Finder;
-use Symfony\Component\Yaml\Yaml;
+use Mondongo\MondongoBundle\DependencyInjection\Compiler\MondongoMondatorPass;
 
 /**
  * MondongoBundle.
@@ -40,12 +39,8 @@ class MondongoBundle extends Bundle
      */
     public function boot()
     {
-        \Mondongo\Container::clear();
-        \Mondongo\Container::setLoader(array($this, 'loadMondongo'));
-
-        $this->initializeBaseClasses();
-
-        spl_autoload_register(array($this, 'loadBaseClasses'));
+        MondongoContainer::setLoader('default', array($this, 'loadMondongo'));
+        MondongoContainer::setDefaultName('default');
     }
 
     /**
@@ -53,12 +48,17 @@ class MondongoBundle extends Bundle
      */
     public function shutdown()
     {
-        spl_autoload_unregister(array($this, 'loadBaseClasses'));
+        MondongoContainer::clear();
     }
 
-    public function registerExtensions(ContainerBuilder $container)
+    /**
+     * {@inheritdoc}
+     */
+    public function build(ContainerBuilder $container)
     {
-        parent::registerExtensions($container);
+        parent::build($container);
+
+        $container->addCompilerPass(new MondongoMondatorPass());
     }
 
     /**
@@ -67,194 +67,6 @@ class MondongoBundle extends Bundle
     public function loadMondongo()
     {
         return $this->container->get('mondongo');
-    }
-
-    /**
-     * Returns the base classes dir.
-     */
-    public function getBaseClassesDir()
-    {
-        return $this->container->getParameter('kernel.cache_dir').'/mondongo/Base';
-    }
-
-    /**
-     * Initialize the base classes.
-     */
-    protected function initializeBaseClasses()
-    {
-        $reload = false;
-        if ($this->container->getParameter('kernel.debug')) {
-            $hashFile = $this->getBaseClassesHashFile();
-            if (!file_exists($hashFile) || file_get_contents($hashFile) !== $this->getConfigFilesHash()) {
-                $reload = true;
-            }
-        }
-
-        if ($reload || !file_exists($this->getBaseClassesDir())) {
-            $this->generateBaseClasses();
-        }
-    }
-
-    /**
-     * Load the base classes.
-     */
-    public function loadBaseClasses($class)
-    {
-        if (0 === strpos($class, 'Base\\')) {
-            $className = substr($class, 5);
-            if (false === strpos($className, '\\')) {
-                $file = $this->getBaseClassesDir().'/'.$className.'.php';
-                if (file_exists($file)) {
-                    require($file);
-                }
-            }
-        }
-    }
-
-    /**
-     * Generates all classes.
-     */
-    public function generateAllClasses()
-    {
-        $this->generateClasses(false);
-    }
-
-    /**
-     * Generate only the base classes.
-     */
-    public function generateBaseClasses()
-    {
-        $this->generateClasses(true);
-    }
-
-    protected function generateClasses($onlyBaseClasses = true)
-    {
-        $configClasses = array();
-        foreach ($this->container->get('kernel')->getBundles() as $bundle) {
-            $bundleClass     = get_class($bundle);
-            $bundleNamespace = substr($bundleClass, 0, strrpos($bundleClass, '\\'));
-            $bundleName      = substr($bundleClass, strrpos($bundleClass, '\\') + 1);
-
-            if (is_dir($dir = $bundle->getPath().'/Resources/config/mondongo')) {
-                $finder = new Finder();
-                foreach ($finder->files()->name('*.yml')->followLinks()->in($dir) as $file) {
-                    foreach ((array) Yaml::load($file) as $class => $configClass) {
-                        // class
-                        if (0 === strpos($class, $bundleNamespace)) {
-                            if (
-                                0 !== strpos($class, $bundleNamespace.'\\Document')
-                                ||
-                                strlen($bundleNamespace.'\\Document') !== strrpos($class, '\\')
-                            ) {
-                                throw new \RuntimeException(sprintf('The class "%s" is not in the Document namespace of the bundle.', $class));
-                            }
-                        }
-
-                        // outputs && bundle
-                        if (0 === strpos($class, $bundleNamespace)) {
-                            $configClass['output'] = $bundle->getPath().'/Document';
-                        } else {
-                            unset($configClass['output']);
-                        }
-
-                        // merge
-                        if (!isset($configClasses[$class])) {
-                            $configClasses[$class] = array();
-                        }
-                        $configClasses[$class] = static::arrayDeepMerge($configClasses[$class], $configClass);
-                    }
-                }
-            }
-        }
-
-        // final classes
-        foreach ($configClasses as $class => &$configClass) {
-            if (isset($configClass['final_class']) && 0 === strpos($configClass['final_class'], '|')) {
-                $configClass['final_class'] = $this->container->getParameter(substr($configClass['final_class'], 1));
-            }
-        }
-
-        // mondator
-        $mondator = $this->container->get('mondongo.mondator');
-
-        $extensions = array(
-            new \Mondongo\Extension\Core(),
-            new \Mondongo\Extension\DocumentDataMap(),
-            new \Bundle\Mondongo\MondongoBundle\Extension\KernelCacheBaseClasses(array('base_classes_dir' => $this->getBaseClassesDir())),
-            new \Bundle\Mondongo\MondongoBundle\Extension\DocumentValidation(),
-            new \Bundle\Mondongo\MondongoBundle\Extension\DocumentForm(),
-        );
-        $extensions = array_merge($extensions, $mondator->getExtensions());
-        if ($onlyBaseClasses) {
-            $extensions[] = new \Bundle\Mondongo\MondongoBundle\Extension\OnlyBaseClasses();
-        }
-
-        $mondator->setExtensions($extensions);
-        $mondator->setConfigClasses($configClasses);
-        $mondator->process();
-
-        // hash
-        $hashFile = $this->getBaseClassesHashFile();
-        $tmpFile = tempnam(dirname($hashFile), basename($hashFile));
-        if (!is_dir(dirname($hashFile))) {
-            if (false === @mkdir(dirname($hashFile), 0777, true)) {
-                throw new \RuntimeException(sprintf('Unable to create the directory "%s".', dirname($hashFile)));
-            }
-        }
-        if (false === @file_put_contents($tmpFile, $this->getConfigFilesHash()) || !@rename($tmpFile, $hashFile)) {
-            throw new \RuntimeException(sprintf('Failed to write cache file "%s".', $hashFile));
-        }
-        chmod($hashFile, 0644);
-    }
-
-    protected function getBaseClassesHashFile()
-    {
-        return $this->getBaseClassesDir().'/hash';
-    }
-
-    protected function getConfigFilesHash()
-    {
-        $dirs = array();
-        foreach ($this->container->get('kernel')->getBundles() as $bundle) {
-            if (is_dir($dir = $bundle->getPath().'/Resources/config/mondongo')) {
-                $dirs[] = $dir;
-            }
-        }
-
-        if (!$dirs) {
-            return 'empty';
-        }
-
-        $finder = new Finder();
-        $finder->files()->name('*.yml')->followLinks();
-
-        $files = array();
-        foreach ($finder->in($dirs) as $file) {
-            $file = (string) $file;
-            $files[$file] = filemtime($file);
-        }
-
-        return sha1(serialize($files));
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function getNamespace()
-    {
-        return __NAMESPACE__;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function getPath()
-    {
-        if (null === $this->name) {
-            $this->initReflection();
-        }
-        
-        return strtr(__DIR__, '\\', '/');
     }
 
     /*

@@ -19,7 +19,7 @@
  * along with MondongoBundle. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace Bundle\Mondongo\MondongoBundle\Logger;
+namespace Mondongo\MondongoBundle\Logger;
 
 use Symfony\Component\HttpKernel\Log\LoggerInterface;
 

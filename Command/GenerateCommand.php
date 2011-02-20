@@ -19,12 +19,13 @@
  * along with MondongoBundle. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace Bundle\Mondongo\MondongoBundle\Command;
+namespace Mondongo\MondongoBundle\Command;
 
 use Symfony\Bundle\FrameworkBundle\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use Mondongo\Mondator\Mondator;
+use Symfony\Component\Finder\Finder;
+use Symfony\Component\Yaml\Yaml;
 
 /**
  * GenerateCommand.
@@ -41,7 +42,7 @@ class GenerateCommand extends Command
     {
         $this
             ->setName('mondongo:generate')
-            ->setDescription('Generate documents classes from config classes.')
+            ->setDescription('Generate classes from config classes')
         ;
     }
 
@@ -50,12 +51,81 @@ class GenerateCommand extends Command
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $output->writeln('generating classes');
+        /*$mondongo = $this->container->get('mondongo');
+        print_r($mondongo);
+        exit();*/
 
-        foreach ($this->container->get('kernel')->getBundles() as $bundle) {
-            if ('Bundle\Mondongo\MondongoBundle\MondongoBundle' == get_class($bundle)) {
-                $bundle->generateAllClasses();
+        $output->writeln('processing config classes');
+
+        $modelDir = $this->container->getParameter('kernel.root_dir').'/../src/Model';
+
+        $configClasses = array();
+
+        // application
+        if (is_dir($dir = $this->container->getParameter('kernel.root_dir').'/config/mondongo')) {
+            $finder = new Finder();
+            foreach ($finder->files()->name('*.yml')->followLinks()->in($dir) as $file) {
+                foreach ((array) Yaml::load($file) as $class => $configClass) {
+                    // class
+                    if (0 !== strpos($class, 'Model\\')) {
+                        throw new \RuntimeException('The Mondongo documents must been in the "Model\" namespace.');
+                    }
+
+                    // config class
+                    $configClass['output'] = $modelDir.'/'.str_replace('\\', '/', substr(substr($class, 0, strrpos($class, '\\')), 6));
+                    $configClass['bundle_name']      = null;
+                    $configClass['bundle_namespace'] = null;
+                    $configClass['bundle_dir']       = null;
+
+                    $configClasses[$class] = $configClass;
+                }
             }
         }
+
+        // bundles
+        $configClassesPending = array();
+        foreach ($this->container->get('kernel')->getBundles() as $bundle) {
+            $bundleModelNamespace = 'Model\\'.$bundle->getName();
+
+            if (is_dir($dir = $bundle->getPath().'/Resources/config/mondongo')) {
+                $finder = new Finder();
+                foreach ($finder->files()->name('*.yml')->followLinks()->in($dir) as $file) {
+                    foreach ((array) Yaml::load($file) as $class => $configClass) {
+                        // class
+                        if (0 !== strpos($class, 'Model\\')) {
+                            throw new \RuntimeException('The Mondongo documents must been in the "Model\" namespace.');
+                        }
+                        if (0 !== strpos($class, $bundleModelNamespace)) {
+                            unset($configClass['output'], $configClass['bundle_name'], $configClass['bundle_dir']);
+                            $configClassesPending[] = array('class' => $class, 'config_class' => $configClass);
+                            continue;
+                        }
+
+                        // config class
+                        $configClass['output'] = $modelDir.'/'.str_replace('\\', '/', substr(substr($class, 0, strrpos($class, '\\')), 6));
+                        $configClass['bundle_name']      = $bundle->getName();
+                        $configClass['bundle_namespace'] = $bundle->getNamespace();
+                        $configClass['bundle_dir']       = $bundle->getPath();
+
+                        $configClasses[$class] = $configClass;
+                    }
+                }
+            }
+        }
+
+        // merge bundles
+        foreach ($configClassesPending as $pending) {
+            if (!isset($configClasses[$pending['class']])) {
+                throw new \RuntimeException(sprintf('The class "%s" does not exist.', $pending['class']));
+            }
+
+            $configClasses[$pending['class']] = array_merge_recursive($pending['config_class'], $configClasses[$pending['class']]);
+        }
+
+        $output->writeln('generating classes');
+
+        $mondator = $this->container->get('mondongo.mondator');
+        $mondator->setConfigClasses($configClasses);
+        $mondator->process();
     }
 }

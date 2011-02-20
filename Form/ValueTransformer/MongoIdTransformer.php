@@ -19,7 +19,7 @@
  * along with MondongoBundle. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace Bundle\Mondongo\MondongoBundle\Form\ValueTransformer;
+namespace Mondongo\MondongoBundle\Form\ValueTransformer;
 
 use Symfony\Component\Form\ValueTransformer\BaseValueTransformer;
 

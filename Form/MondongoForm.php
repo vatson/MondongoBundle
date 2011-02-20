@@ -19,7 +19,7 @@
  * along with MondongoBundle. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace Bundle\Mondongo\MondongoBundle\Form;
+namespace Mondongo\MondongoBundle\Form;
 
 use Symfony\Component\Form\Form;
 use Mondongo\Inflector;

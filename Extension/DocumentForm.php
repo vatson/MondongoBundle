@@ -19,7 +19,7 @@
  * along with MondongoBundle. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace Bundle\Mondongo\MondongoBundle\Extension;
+namespace Mondongo\MondongoBundle\Extension;
 
 use Mondongo\Mondator\Extension;
 use Mondongo\Mondator\Definition\Definition;
@@ -92,7 +92,7 @@ EOF
 
         // form base
         $this->definitions['form_base'] = $definition = new Definition($formBaseClass);
-        $definition->setParentClass('\Bundle\Mondongo\MondongoBundle\Form\MondongoForm');
+        $definition->setParentClass('\Mondongo\MondongoBundle\Form\MondongoForm');
         $definition->setIsAbstract(true);
         $definition->setDocComment(<<<EOF
 /**
@@ -153,7 +153,7 @@ EOF
                 throw new \RuntimeException(sprintf('The reference for the field "%s" does not exists.', $name));
             }
 
-            $class = 'Bundle\Mondongo\MondongoBundle\Form\MondongoChoiceField';
+            $class = 'Mondongo\MondongoBundle\Form\MondongoChoiceField';
             $options['class'] = $reference['class'];
             if ('one' == $reference['type']) {
                 $options['add_empty'] = true;
@@ -266,7 +266,7 @@ EOF;
             // many
             } else {
                 $code = <<<EOF
-        \$fieldGroup = new \Bundle\Mondongo\MondongoBundle\Form\MondongoFieldGroup('$name');
+        \$fieldGroup = new \Mondongo\MondongoBundle\Form\MondongoFieldGroup('$name');
         foreach (\$this->getData()->$referenceGetter() as \$key => \$reference) {
             \$form = new \\$formClass(\$key, \$reference);
             \$form->setPropertyPath(\$key);
@@ -341,7 +341,7 @@ EOF;
             // many
             } else {
                 $code = <<<EOF
-        \$fieldGroup = new \Bundle\Mondongo\MondongoBundle\Form\MondongoFieldGroup('$name');
+        \$fieldGroup = new \Mondongo\MondongoBundle\Form\MondongoFieldGroup('$name');
         foreach (\$this->getData()->$embeddedGetter() as \$key => \$embedded) {
             \$form = new \\$formClass(\$key, \$embedded);
             \$form->setPropertyPath(\$key);

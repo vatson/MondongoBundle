@@ -19,7 +19,7 @@
  * along with MondongoBundle. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace Bundle\Mondongo\MondongoBundle\Security;
+namespace Mondongo\MondongoBundle\Security;
 
 use Symfony\Component\Security\User\AccountInterface;
 use Symfony\Component\Security\User\UserProviderInterface;

@@ -7,20 +7,26 @@
   <parameters>
     <!-- mondongo -->
     <parameter key="mondongo.class">Mondongo\Mondongo</parameter>
+    <parameter key="mondongo.metadata_class">Model\Mapping\Metadata</parameter>
+    <parameter key="mondongo.metadata_output">%kernel.root_dir%/../src/Model/Mapping</parameter>
 
     <!-- mondator -->
     <parameter key="mondongo.mondator_class">Mondongo\Mondator\Mondator</parameter>
 
     <!-- logger -->
-    <parameter key="mondongo.logger_class">Bundle\Mondongo\MondongoBundle\Logger\MondongoLogger</parameter>
+    <parameter key="mondongo.logger_class">Mondongo\MondongoBundle\Logger\MondongoLogger</parameter>
 
     <!-- data collector -->
-    <parameter key="mondongo.data_collector_class">Bundle\Mondongo\MondongoBundle\DataCollector\MondongoDataCollector</parameter>
+    <parameter key="mondongo.data_collector_class">Mondongo\MondongoBundle\DataCollector\MondongoDataCollector</parameter>
   </parameters>
 
   <services>
     <!-- mondongo -->
     <service id="mondongo" class="%mondongo.class%">
+        <argument type="service" id="mondongo.metadata" />
+    </service>
+
+    <service id="mondongo.metadata" class="%mondongo.metadata_class%">
     </service>
 
     <!-- mondator -->
@@ -33,8 +39,8 @@
     </service>
 
     <!-- data collector -->
-    <service id="mondongo.data_collector" class="%mondongo.data_collector_class%">
-        <tag name="data_collector" template="Mondongo/MondongoBundle:Collector:mondongo" />
+    <service id="mondongo.data_collector" class="%mondongo.data_collector_class%" public="false">
+        <tag name="data_collector" template="MondongoBundle:Collector:mondongo" id="mondongo" />
         <argument type="service" id="mondongo.logger" />
     </service>
   </services>

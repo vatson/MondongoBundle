@@ -19,10 +19,11 @@
  * along with MondongoBundle. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace Bundle\Mondongo\MondongoBundle\DependencyInjection;
+namespace Mondongo\MondongoBundle\DependencyInjection;
 
 use Symfony\Component\DependencyInjection\Extension\Extension;
 use Symfony\Component\DependencyInjection\Loader\XmlFileLoader;
+use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\DependencyInjection\Reference;
@@ -38,21 +39,19 @@ class MondongoExtension extends Extension
     /**
      * Loads the Mondongo configuration.
      *
-     * @param array            $config    An array of settings.
+     * @param array            $configs   An array of settings.
      * @param ContainerBuilder $container A ContainerBuilder instance.
-     *
-     * @return void
      */
-    public function configLoad(array $configs, ContainerBuilder $container)
+    public function load(array $configs, ContainerBuilder $container)
     {
-        $loader = new XmlFileLoader($container, __DIR__.'/../Resources/config');
+        $loader = new XmlFileLoader($container, new FileLocator(__DIR__.'/../Resources/config'));
         $loader->load('mondongo.xml');
-        
+
         foreach ($configs as $config) {
             $this->doConfigLoad($config, $container);
         }
     }
-    
+
     protected function doConfigLoad($config, $container)
     {
         // override defaults parameters
@@ -83,7 +82,7 @@ class MondongoExtension extends Extension
                     $name,
                     new Reference($connectionDefinitionName),
                 ));
-                
+
                 // default?
                 if (isset($connection['default']) && $connection['default']) {
                     if (null !== $defaultConnection) {
