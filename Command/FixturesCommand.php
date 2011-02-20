@@ -19,7 +19,7 @@
  * along with MondongoBundle. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace Bundle\Mondongo\MondongoBundle\Command;
+namespace Mondongo\MondongoBundle\Command;
 
 use Symfony\Bundle\FrameworkBundle\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
@@ -55,12 +55,22 @@ class FixturesCommand extends Command
         $output->writeln('processing fixtures');
 
         $data = array();
+
+        // application
+        if (is_dir($dir = $this->container->getParameter('kernel.root_dir').'/fixtures/mondongo')) {
+            $finder = new Finder();
+            foreach ($finder->files()->name('*.yml')->followLinks()->in($dir) as $file) {
+                $data = \Mondongo\MondongoBundle\MondongoBundle::arrayDeepMerge($data, (array) Yaml::load($file));
+            }
+        }
+
+        // bundles
         foreach ($this->container->get('kernel')->getBundles() as $bundle) {
             if (is_dir($dir = $bundle->getPath().'/Resources/fixtures/mondongo'))
             {
                 $finder = new Finder();
                 foreach ($finder->files()->name('*.yml')->followLinks()->in($dir) as $file) {
-                    $data = \Bundle\Mondongo\MondongoBundle\MondongoBundle::arrayDeepMerge($data, (array) Yaml::load($file));
+                    $data = \Mondongo\MondongoBundle\MondongoBundle::arrayDeepMerge($data, (array) Yaml::load($file));
                 }
             }
         }

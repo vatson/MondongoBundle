@@ -19,7 +19,7 @@
  * along with MondongoBundle. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace Bundle\Mondongo\MondongoBundle\Validator\Constraint;
+namespace Mondongo\MondongoBundle\Validator\Constraint;
 
 use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\ConstraintValidator;

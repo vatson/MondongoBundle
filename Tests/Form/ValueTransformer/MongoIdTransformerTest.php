@@ -19,9 +19,9 @@
  * along with MondongoBundle. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace Bundle\Mondongo\MondongoBundle\Tests\Form\ValueTransformer;
+namespace Mondongo\MondongoBundle\Tests\Form\ValueTransformer;
 
-use Bundle\Mondongo\MondongoBundle\Form\ValueTransformer\MongoIdTransformer;
+use Mondongo\MondongoBundle\Form\ValueTransformer\MongoIdTransformer;
 
 class MongoIdTransformerTest extends \PHPUnit_Framework_TestCase
 {
